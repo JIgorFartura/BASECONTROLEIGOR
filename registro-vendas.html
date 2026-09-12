@@ -186,7 +186,7 @@
 
     <p class="footer-note">
       Os dados ficam salvos automaticamente e são compartilhados com quem tiver acesso a este painel.
-      <span class="btn-ghost" id="btnReset">Zerar base de dados</span>
+      <span class="btn-ghost" id="btnReset">Zerar base de dados</span> · <span class="btn-ghost" id="btnLock">Bloquear novamente</span>
     </p>
   </div>
 
@@ -260,6 +260,19 @@
     </div>
   </div>
 
+  <div class="overlay open" id="lockOverlay" style="z-index:200;">
+    <div class="modal" style="max-width:380px; text-align:center;">
+      <h3 style="font-family:var(--font-display); font-size:19px; margin:0 0 6px;">Acesso restrito</h3>
+      <p style="color:var(--text-muted); font-size:13px; margin:0 0 18px;">Digite a senha para abrir o painel.</p>
+      <form id="lockForm">
+        <input type="password" id="lockInput" placeholder="Senha" autocomplete="off"
+          style="width:100%; background:var(--surface-2); border:1px solid var(--border); color:var(--text); padding:12px 14px; border-radius:var(--radius-sm); font-size:15px; text-align:center; margin-bottom:10px;">
+        <div id="lockError" style="color:var(--coral); font-size:12.5px; min-height:16px; margin-bottom:6px;"></div>
+        <button type="submit" class="btn-primary" style="width:100%; justify-content:center;">Entrar</button>
+      </form>
+    </div>
+  </div>
+
   <div class="toast-stack" id="toastStack"></div>
 
 <script>
@@ -302,6 +315,10 @@
   // Cole aqui a URL do seu Apps Script (Deploy > Nova implantação > Web app), terminada em /exec
   const API_URL = 'https://script.google.com/macros/s/AKfycbwWJr-SqBA9Evk2ohEKRLqKovzGdAPvoTKYPH1ybrqfLejp1DMsE_vURGnwGUw79gFYPA/exec';
 
+  // Senha de acesso a este painel — troque pela que quiser, é só editar o texto entre aspas.
+  const ACCESS_CODE = 'fartura2026';
+  const ACCESS_KEY = 'acesso-jose-igor';
+
   let state = {
     vendas: [],
     filters: {search:'', porte:'', operadora:'', corretor:'', status:''},
@@ -325,6 +342,7 @@
     btnNovo:$('btnNovo'), btnCloseModal:$('btnCloseModal'), btnCancelModal:$('btnCancelModal'),
     resetOverlay:$('resetOverlay'), btnReset:$('btnReset'), btnCancelReset:$('btnCancelReset'), btnConfirmReset:$('btnConfirmReset'),
     toastStack:$('toastStack'),
+    lockOverlay:$('lockOverlay'), lockForm:$('lockForm'), lockInput:$('lockInput'), lockError:$('lockError'), btnLock:$('btnLock'),
   };
 
   // ---------- helpers ----------
@@ -706,6 +724,10 @@
     });
 
     els.btnReset.addEventListener('click', ()=>els.resetOverlay.classList.add('open'));
+    els.btnLock.addEventListener('click', ()=>{
+      try{ localStorage.removeItem(ACCESS_KEY); }catch(err){}
+      location.reload();
+    });
     els.btnCancelReset.addEventListener('click', ()=>els.resetOverlay.classList.remove('open'));
     els.resetOverlay.addEventListener('click', e=>{ if(e.target===els.resetOverlay) els.resetOverlay.classList.remove('open'); });
     els.btnConfirmReset.addEventListener('click', async ()=>{
@@ -728,8 +750,33 @@
     });
   }
 
+  function checkAccess(){
+    let unlocked = false;
+    try{ unlocked = localStorage.getItem(ACCESS_KEY) === '1'; }catch(e){ /* segue pedindo senha */ }
+    if(unlocked){
+      els.lockOverlay.classList.remove('open');
+      loadAll();
+      return;
+    }
+    els.lockOverlay.classList.add('open');
+    setTimeout(()=>els.lockInput.focus(), 60);
+  }
+  els.lockForm.addEventListener('submit', e=>{
+    e.preventDefault();
+    if(els.lockInput.value.trim() === ACCESS_CODE){
+      try{ localStorage.setItem(ACCESS_KEY, '1'); }catch(err){}
+      els.lockOverlay.classList.remove('open');
+      els.lockError.textContent = '';
+      loadAll();
+    } else {
+      els.lockError.textContent = 'Senha incorreta.';
+      els.lockInput.value = '';
+      els.lockInput.focus();
+    }
+  });
+
   bindEvents();
-  loadAll();
+  checkAccess();
 })();
 </script>
 </body>
