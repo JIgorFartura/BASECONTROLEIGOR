@@ -352,17 +352,22 @@
     if(!res.ok) throw new Error('http '+res.status);
     return res.json();
   }
-  async function apiSave(vendas){
-    // O Google redireciona o POST do /exec para outro domínio; em modo "cors" normal
-    // isso costuma derrubar o corpo da requisição. "no-cors" evita esse problema —
-    // em troca, não conseguimos ler a resposta (assumimos sucesso se não der erro de rede).
+  // O Google redireciona o POST do /exec para outro domínio; em modo "cors" normal
+  // isso costuma derrubar o corpo da requisição. "no-cors" evita esse problema —
+  // em troca, não conseguimos ler a resposta (assumimos sucesso se não der erro de rede).
+  async function apiCall(payload){
     await fetch(API_URL, {
       method:'POST',
       mode:'no-cors',
       headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body: JSON.stringify({ vendas })
+      body: JSON.stringify(payload)
     });
     return { ok:true };
+  }
+  async function persist(action, payload){
+    if(!apiConfigured()) return;
+    try{ await apiCall(Object.assign({action}, payload)); }
+    catch(e){ showToast('Não foi possível salvar agora. Verifique a conexão com a planilha.', 'error'); }
   }
 
   async function loadAll(){
@@ -385,11 +390,7 @@
     ensureStaticSelectOptions();
     render();
   }
-  async function persistVendas(){
-    if(!apiConfigured()) return;
-    try{ await apiSave(state.vendas); }
-    catch(e){ showToast('Não foi possível salvar agora. Verifique a conexão com a planilha.', 'error'); }
-  }
+
 
   // ---------- toast / confetti ----------
   function showToast(msg, type){
@@ -617,15 +618,20 @@
         dataVigencia: porteVal === 'Adesão' ? (els.inputVigencia.value || '') : '',
       };
       const isEdit = state.modal.mode==='edit';
+      let savedVenda;
       if(isEdit){
         const idx = state.vendas.findIndex(v=>v.id===state.modal.editId);
-        if(idx>-1) state.vendas[idx] = Object.assign({}, state.vendas[idx], data, {updatedAt:Date.now()});
+        if(idx>-1){
+          state.vendas[idx] = Object.assign({}, state.vendas[idx], data, {updatedAt:Date.now()});
+          savedVenda = state.vendas[idx];
+        }
       } else {
-        state.vendas.push(Object.assign({id:uid(), createdAt:Date.now(), updatedAt:Date.now()}, data));
+        savedVenda = Object.assign({id:uid(), createdAt:Date.now(), updatedAt:Date.now()}, data);
+        state.vendas.push(savedVenda);
       }
       closeModal();
       render();
-      await persistVendas();
+      await persist('upsert', { venda: savedVenda });
       showToast(isEdit ? 'Venda atualizada.' : 'Venda registrada.');
       if(data.status==='Implantado') celebrate();
     });
@@ -644,7 +650,7 @@
           state.vendas = state.vendas.filter(x=>x.id!==id);
           state.confirmDeleteId = null;
           render();
-          persistVendas();
+          persist('delete', { id });
           showToast('Venda excluída.');
         } else if(action==='confirm-no'){
           state.confirmDeleteId = null;
@@ -668,7 +674,7 @@
       v.status = newStatus;
       v.updatedAt = Date.now();
       render();
-      await persistVendas();
+      await persist('upsert', { venda: v });
       showToast('Status atualizado.');
       if(newStatus==='Implantado' && oldStatus!=='Implantado') celebrate();
     });
@@ -710,7 +716,7 @@
       els.searchInput.value = '';
       els.resetOverlay.classList.remove('open');
       render();
-      await persistVendas();
+      await persist('reset', {});
       showToast('Base de dados zerada.');
     });
 
