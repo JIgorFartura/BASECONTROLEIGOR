@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Relatório de vendas José Igor Fartura</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0D1310;
+    --surface:#141F19;
+    --surface-2:#1B2921;
+    --border:#24352C;
+    --text:#EAF2ED;
+    --text-muted:#86988C;
+    --text-faint:#56655D;
+    --accent:#2FD892;
+    --gold:#F2B84B;
+    --coral:#FF7A66;
+    --radius-sm:8px;
+    --radius-md:14px;
+    --radius-lg:20px;
+    --font-display:'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+    --font-body:'Manrope', ui-sans-serif, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:radial-gradient(ellipse 1200px 600px at 50% -10%, #16241C 0%, var(--bg) 55%);
+    color:var(--text);
+    font-family:var(--font-body);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--accent); color:#08120D;}
+  :focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:4px;}
+  ::-webkit-scrollbar{width:10px; height:10px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  ::-webkit-scrollbar-thumb{background:var(--border); border-radius:8px;}
+  ::placeholder{color:var(--text-faint);}
+  button{font-family:inherit;}
+
+  .container{max-width:1180px; margin:0 auto; padding:32px 20px 70px;}
+
+  header.top{display:flex; justify-content:space-between; align-items:flex-end; gap:16px; margin-bottom:26px; flex-wrap:wrap;}
+  .brand h1{font-family:var(--font-display); font-size:30px; font-weight:700; margin:0 0 4px; letter-spacing:-0.02em;}
+  @media(max-width:600px){.brand h1{font-size:23px;}}
+  .brand p{margin:0; color:var(--text-muted); font-size:13.5px;}
+
+  .btn-primary{background:var(--accent); color:#07130D; border:none; padding:12px 20px; border-radius:var(--radius-sm); font-weight:700; font-size:14px; display:inline-flex; align-items:center; gap:8px; cursor:pointer; transition:transform .15s ease, box-shadow .15s ease;}
+  .btn-primary:hover{transform:translateY(-1px); box-shadow:0 8px 20px rgba(47,216,146,.25);}
+  .btn-secondary{background:transparent; border:1px solid var(--border); color:var(--text); padding:11px 18px; border-radius:var(--radius-sm); font-size:14px; cursor:pointer; display:inline-flex; gap:8px; align-items:center;}
+  .btn-secondary:hover{border-color:var(--accent); color:var(--accent);}
+  .btn-ghost{background:none; border:none; color:var(--text-muted); font-size:12.5px; cursor:pointer; text-decoration:underline; text-underline-offset:3px; padding:0;}
+  .btn-ghost:hover{color:var(--coral);}
+
+  .stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; margin-bottom:22px;}
+  .stat-card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:18px 20px;}
+  .stat-card .label{font-size:12.5px; color:var(--text-muted); margin-bottom:8px;}
+  .stat-card .value{font-family:var(--font-display); font-size:25px; font-weight:600; letter-spacing:-0.01em;}
+  .stat-card.accent .value{color:var(--accent);}
+  .stat-card.gold .value{color:var(--gold);}
+
+  .panel{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:20px 22px; margin-bottom:22px;}
+  .panel h2{font-family:var(--font-display); font-size:15.5px; margin:0 0 16px; font-weight:600;}
+
+  .funnel{display:flex; flex-direction:column; gap:4px;}
+  .funnel-row{display:flex; flex-direction:column; gap:6px; padding:10px 10px; border-radius:10px; cursor:pointer; transition:background .15s;}
+  .funnel-row:hover{background:var(--surface-2);}
+  .funnel-row.active{background:var(--surface-2); box-shadow:inset 0 0 0 1px var(--border);}
+  .funnel-row-top{display:flex; justify-content:space-between; align-items:center; gap:12px;}
+  .funnel-label{font-size:13px; color:var(--text); display:flex; align-items:center; gap:8px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .funnel-dot{width:8px; height:8px; border-radius:50%; flex:none;}
+  .funnel-count{font-family:var(--font-display); font-size:13px; font-weight:600; white-space:nowrap;}
+  .funnel-bar-track{background:var(--surface-2); border-radius:6px; height:7px; overflow:hidden;}
+  .funnel-bar-fill{height:100%; border-radius:6px; transition:width .4s ease;}
+  .funnel-row-bottom{display:flex; justify-content:flex-end;}
+  .funnel-valor{font-size:12px; color:var(--text-muted);}
+  .empty-mini{color:var(--text-faint); font-size:13px; padding:8px 0;}
+
+  .toolbar{display:flex; flex-wrap:wrap; gap:10px; margin-bottom:14px; align-items:center;}
+  .search-box{position:relative; flex:1; min-width:200px;}
+  .search-box input{width:100%; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px 14px 10px 36px; color:var(--text); font-size:13.5px; font-family:var(--font-body);}
+  .search-box svg{position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-faint);}
+  select.filter{background:var(--surface); border:1px solid var(--border); color:var(--text); padding:10px 12px; border-radius:var(--radius-sm); font-size:13px; font-family:var(--font-body); max-width:160px;}
+
+  .table-wrap{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md); overflow:auto; max-height:600px;}
+  table{width:100%; border-collapse:collapse; min-width:940px; font-size:13.5px;}
+  thead th{position:sticky; top:0; background:var(--surface-2); text-align:left; padding:12px 16px; font-weight:600; color:var(--text-muted); font-size:12px; border-bottom:1px solid var(--border); cursor:pointer; white-space:nowrap; user-select:none;}
+  thead th:hover{color:var(--text);}
+  thead th.sorted{color:var(--accent);}
+  tbody td{padding:12px 16px; border-bottom:1px solid var(--border); vertical-align:middle;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:var(--surface-2);}
+  .badge{display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:100px; font-size:11.5px; font-weight:600; white-space:nowrap;}
+  .status-select{appearance:none; -webkit-appearance:none; -moz-appearance:none; border-radius:100px; padding:5px 26px 5px 12px; font-size:11.5px; font-weight:600; font-family:var(--font-body); cursor:pointer; background-repeat:no-repeat; background-position:right 9px center; background-size:10px; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='10' height='10' fill='none' stroke='%2386988C' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");}
+  .status-select:hover{filter:brightness(1.12);}
+  .status-select:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+  .row-actions{display:flex; gap:6px; justify-content:flex-end;}
+  .icon-btn{background:none; border:1px solid var(--border); color:var(--text-muted); width:30px; height:30px; border-radius:8px; display:inline-flex; align-items:center; justify-content:center; cursor:pointer;}
+  .icon-btn:hover{border-color:var(--accent); color:var(--accent);}
+  .icon-btn.danger:hover{border-color:var(--coral); color:var(--coral);}
+  .confirm-row{display:flex; gap:8px; align-items:center; justify-content:flex-end; font-size:12px; color:var(--text-muted); white-space:nowrap;}
+  .confirm-row button{border:none; border-radius:6px; padding:6px 10px; font-size:12px; cursor:pointer; font-weight:700;}
+  .confirm-yes{background:var(--coral); color:#2A0E09;}
+  .confirm-no{background:var(--surface-2); color:var(--text);}
+
+  .empty-state{padding:56px 20px; text-align:center; color:var(--text-muted);}
+  .empty-state svg{margin-bottom:10px; opacity:.45;}
+  .empty-state p{margin:4px 0;}
+  .empty-state .cta{color:var(--accent); font-weight:700; cursor:pointer;}
+
+  .overlay{position:fixed; inset:0; background:rgba(6,10,8,.72); backdrop-filter:blur(3px); display:flex; align-items:center; justify-content:center; padding:20px; z-index:50; opacity:0; pointer-events:none; transition:opacity .18s ease;}
+  .overlay.open{opacity:1; pointer-events:auto;}
+  .modal{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); width:100%; max-width:560px; max-height:90vh; overflow:auto; padding:26px 28px; transform:translateY(8px) scale(.98); transition:transform .18s ease;}
+  .overlay.open .modal{transform:translateY(0) scale(1);}
+  .modal-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;}
+  .modal-head h3{font-family:var(--font-display); font-size:18px; margin:0;}
+  .field-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px 16px;}
+  @media(max-width:520px){.field-grid{grid-template-columns:1fr;}}
+  .field{display:flex; flex-direction:column; gap:6px;}
+  .field.full{grid-column:1/-1;}
+  .field label{font-size:12px; color:var(--text-muted); font-weight:600;}
+  .field input, .field select{background:var(--surface-2); border:1px solid var(--border); color:var(--text); padding:10px 12px; border-radius:var(--radius-sm); font-size:14px; font-family:var(--font-body); width:100%;}
+  .field input:focus, .field select:focus{border-color:var(--accent);}
+  .currency-wrap{position:relative;}
+  .currency-wrap span{position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-muted); font-size:13px; pointer-events:none;}
+  .currency-wrap input{padding-left:34px;}
+  .modal-actions{display:flex; justify-content:flex-end; gap:10px; margin-top:22px;}
+
+  .toast-stack{position:fixed; bottom:20px; right:20px; display:flex; flex-direction:column; gap:10px; z-index:80; max-width:300px;}
+  .toast{background:var(--surface-2); border:1px solid var(--border); border-left:3px solid var(--accent); padding:12px 16px; border-radius:10px; font-size:13px; box-shadow:0 12px 24px rgba(0,0,0,.35); animation:toast-in .25s ease;}
+  .toast.error{border-left-color:var(--coral);}
+  @keyframes toast-in{from{opacity:0; transform:translateX(12px);} to{opacity:1; transform:translateX(0);}}
+
+  .confetti{position:fixed; width:8px; height:8px; border-radius:2px; top:-12px; z-index:90; pointer-events:none; animation:confetti-fall linear forwards;}
+  @keyframes confetti-fall{to{transform:translateY(105vh) rotate(360deg); opacity:0;}}
+
+  .footer-note{text-align:center; margin-top:36px; font-size:12px; color:var(--text-faint);}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.001ms !important; transition-duration:.001ms !important;}
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <header class="top">
+      <div class="brand">
+        <h1>Relatório de vendas José Igor Fartura</h1>
+        <p>Painel de propostas e vendas — planos de saúde e odonto</p>
+      </div>
+      <button class="btn-primary" id="btnNovo">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+        Nova venda
+      </button>
+    </header>
+
+    <div class="stats" id="stats"></div>
+
+    <div class="panel">
+      <h2>Funil por status</h2>
+      <div class="funnel" id="funnel"></div>
+    </div>
+
+    <div class="toolbar">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" id="searchInput" placeholder="Buscar por empresa, proposta ou corretor…">
+      </div>
+      <select class="filter" id="filterPorte"></select>
+      <select class="filter" id="filterOperadora"></select>
+      <select class="filter" id="filterCorretor"></select>
+      <select class="filter" id="filterStatus"></select>
+      <button class="btn-secondary" id="btnLimparFiltros">Limpar filtros</button>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr id="theadRow"></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+
+    <p class="footer-note">
+      Os dados ficam salvos automaticamente e são compartilhados com quem tiver acesso a este painel.
+      <span class="btn-ghost" id="btnReset">Zerar base de dados</span>
+    </p>
+  </div>
+
+  <div class="overlay" id="overlay">
+    <div class="modal">
+      <div class="modal-head">
+        <h3 id="modalTitle">Nova venda</h3>
+        <button class="icon-btn" id="btnCloseModal" type="button">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <form id="vendaForm" novalidate>
+        <div class="field-grid">
+          <div class="field">
+            <label for="inputPorte">Porte da venda</label>
+            <select name="porte" required id="inputPorte"></select>
+          </div>
+          <div class="field" id="fieldVigencia" style="display:none;">
+            <label for="inputVigencia">Data de vigência</label>
+            <input type="date" name="dataVigencia" id="inputVigencia">
+          </div>
+          <div class="field">
+            <label for="inputOperadora">Operadora</label>
+            <input name="operadora" required list="listOperadoras" autocomplete="off" id="inputOperadora" placeholder="Ex: Unimed, Amil, SulAmérica…">
+            <datalist id="listOperadoras"></datalist>
+          </div>
+          <div class="field full">
+            <label for="inputEmpresa" id="labelEmpresa">Empresa/Cliente</label>
+            <input name="empresa" required autocomplete="off" id="inputEmpresa" placeholder="Razão social ou nome completo">
+          </div>
+          <div class="field">
+            <label for="inputValor">Valor</label>
+            <div class="currency-wrap"><span>R$</span><input name="valor" required id="inputValor" inputmode="numeric" placeholder="0,00" data-raw="0"></div>
+          </div>
+          <div class="field">
+            <label for="inputData">Data de emissão da proposta</label>
+            <input type="date" name="dataEmissao" required id="inputData">
+          </div>
+          <div class="field">
+            <label for="inputCorretor">Corretor</label>
+            <input name="corretor" required list="listCorretores" autocomplete="off" id="inputCorretor" placeholder="Nome do corretor">
+            <datalist id="listCorretores"></datalist>
+          </div>
+          <div class="field">
+            <label for="inputStatus">Status</label>
+            <select name="status" required id="inputStatus"></select>
+          </div>
+          <div class="field">
+            <label for="inputNumero">Número da proposta</label>
+            <input name="numeroProposta" required id="inputNumero" placeholder="Nº informado pela operadora">
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" id="btnCancelModal">Cancelar</button>
+          <button type="submit" class="btn-primary">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="overlay" id="resetOverlay">
+    <div class="modal" style="max-width:420px;">
+      <div class="modal-head"><h3>Zerar base de dados</h3></div>
+      <p style="color:var(--text-muted); font-size:13.5px; line-height:1.5; margin:0;">
+        Isso apaga todas as vendas registradas na planilha, para todos que acessam este painel. Não pode ser desfeito.
+      </p>
+      <div class="modal-actions">
+        <button class="btn-secondary" id="btnCancelReset">Cancelar</button>
+        <button class="btn-primary" style="background:var(--coral); box-shadow:none;" id="btnConfirmReset">Apagar tudo</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-stack" id="toastStack"></div>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+
+  const STATUS_LIST = [
+    {key:'Em digitação', color:'#5C8AA6'},
+    {key:'Aguardando assinatura', color:'#4FA6C9'},
+    {key:'Em análise', color:'#3FBFAE'},
+    {key:'Aguardando assinatura final', color:'#3FBF8A'},
+    {key:'Aguardando boleto', color:'#8FBF3F'},
+    {key:'Aguardando pagamento', color:'#D9A93F'},
+    {key:'Aguardando implantação', color:'#E8A03F'},
+    {key:'Implantado', color:'#F2B84B'},
+    {key:'Declinado', color:'#D9534F'},
+    {key:'Cancelado', color:'#7A8A82'},
+  ];
+  const PORTE_LIST = [
+    {key:'PME', color:'#2FD892'},
+    {key:'Adesão', color:'#9B8CFF'},
+    {key:'PF', color:'#5B9BD9'},
+    {key:'Odonto', color:'#FF8FA8'},
+  ];
+  const ICONS = {
+    edit:'<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>',
+    trash:'<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>',
+  };
+  const COLUMNS = [
+    {key:'numeroProposta', label:'Proposta'},
+    {key:'empresa', label:'Empresa/Cliente'},
+    {key:'porte', label:'Porte'},
+    {key:'operadora', label:'Operadora'},
+    {key:'corretor', label:'Corretor'},
+    {key:'valor', label:'Valor'},
+    {key:'dataEmissao', label:'Emissão'},
+    {key:'status', label:'Status'},
+  ];
+
+  // Cole aqui a URL do seu Apps Script (Deploy > Nova implantação > Web app), terminada em /exec
+  const API_URL = 'https://script.google.com/macros/s/AKfycbwWJr-SqBA9Evk2ohEKRLqKovzGdAPvoTKYPH1ybrqfLejp1DMsE_vURGnwGUw79gFYPA/exec';
+
+  let state = {
+    vendas: [],
+    filters: {search:'', porte:'', operadora:'', corretor:'', status:''},
+    sort: {col:'dataEmissao', dir:'desc'},
+    modal: {mode:'novo', editId:null},
+    confirmDeleteId: null,
+  };
+
+  // ---------- refs ----------
+  const els = {
+    stats:$('stats'), funnel:$('funnel'),
+    searchInput:$('searchInput'), filterPorte:$('filterPorte'), filterOperadora:$('filterOperadora'),
+    filterCorretor:$('filterCorretor'), filterStatus:$('filterStatus'), btnLimparFiltros:$('btnLimparFiltros'),
+    theadRow:$('theadRow'), tbody:$('tbody'),
+    overlay:$('overlay'), modalTitle:$('modalTitle'), vendaForm:$('vendaForm'),
+    inputPorte:$('inputPorte'), inputOperadora:$('inputOperadora'), inputEmpresa:$('inputEmpresa'),
+    inputValor:$('inputValor'), inputData:$('inputData'), inputCorretor:$('inputCorretor'),
+    inputStatus:$('inputStatus'), inputNumero:$('inputNumero'),
+    fieldVigencia:$('fieldVigencia'), inputVigencia:$('inputVigencia'), labelEmpresa:$('labelEmpresa'),
+    listOperadoras:$('listOperadoras'), listCorretores:$('listCorretores'),
+    btnNovo:$('btnNovo'), btnCloseModal:$('btnCloseModal'), btnCancelModal:$('btnCancelModal'),
+    resetOverlay:$('resetOverlay'), btnReset:$('btnReset'), btnCancelReset:$('btnCancelReset'), btnConfirmReset:$('btnConfirmReset'),
+    toastStack:$('toastStack'),
+  };
+
+  // ---------- helpers ----------
+  function uid(){ return (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'id-'+Date.now()+'-'+Math.random().toString(36).slice(2); }
+  function sum(arr){ return arr.reduce((a,b)=>a+b,0); }
+  function fmtCurrency(n){ return (n||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); }
+  function fmtDateBR(iso){ if(!iso) return '—'; const p=iso.split('-'); return p.length===3? `${p[2]}/${p[1]}/${p[0]}` : iso; }
+  function escapeHtml(str){ return String(str ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
+  function hexA(hex,a){ const h=hex.replace('#',''); const r=parseInt(h.substring(0,2),16), g=parseInt(h.substring(2,4),16), b=parseInt(h.substring(4,6),16); return `rgba(${r},${g},${b},${a})`; }
+  function getStatusColor(k){ const s=STATUS_LIST.find(s=>s.key===k); return s?s.color:'#888'; }
+  function getPorteColor(k){ const p=PORTE_LIST.find(p=>p.key===k); return p?p.color:'#888'; }
+  function uniqueSorted(arr){ return Array.from(new Set(arr.map(v=>(v||'').trim()).filter(Boolean))).sort((a,b)=>a.localeCompare(b,'pt-BR')); }
+  function maskCurrencyInput(e){
+    const digits = e.target.value.replace(/\D/g,'');
+    if(!digits){ e.target.value=''; e.target.dataset.raw='0'; return; }
+    const value = parseInt(digits,10)/100;
+    e.target.dataset.raw = String(value);
+    e.target.value = value.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  }
+
+  // ---------- storage (Google Sheets via Apps Script) ----------
+  function apiConfigured(){ return API_URL && !API_URL.startsWith('COLE_AQUI'); }
+  async function apiGet(){
+    const res = await fetch(API_URL + '?action=list', { method:'GET', cache:'no-store' });
+    if(!res.ok) throw new Error('http '+res.status);
+    return res.json();
+  }
+  async function apiSave(vendas){
+    // O Google redireciona o POST do /exec para outro domínio; em modo "cors" normal
+    // isso costuma derrubar o corpo da requisição. "no-cors" evita esse problema —
+    // em troca, não conseguimos ler a resposta (assumimos sucesso se não der erro de rede).
+    await fetch(API_URL, {
+      method:'POST',
+      mode:'no-cors',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify({ vendas })
+    });
+    return { ok:true };
+  }
+
+  async function loadAll(){
+    if(!apiConfigured()){
+      els.tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state">
+        <p>Este painel ainda não está ligado à planilha.</p>
+        <p style="font-size:12px;">Cole a URL do Apps Script na constante API_URL, no topo do código.</p>
+      </div></td></tr>`;
+      ensureStaticSelectOptions();
+      return;
+    }
+    els.tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state"><p>Carregando dados…</p></div></td></tr>`;
+    try{
+      const data = await apiGet();
+      state.vendas = data.vendas || [];
+    }catch(e){
+      state.vendas = [];
+      showToast('Não foi possível carregar os dados da planilha.', 'error');
+    }
+    ensureStaticSelectOptions();
+    render();
+  }
+  async function persistVendas(){
+    if(!apiConfigured()) return;
+    try{ await apiSave(state.vendas); }
+    catch(e){ showToast('Não foi possível salvar agora. Verifique a conexão com a planilha.', 'error'); }
+  }
+
+  // ---------- toast / confetti ----------
+  function showToast(msg, type){
+    const el = document.createElement('div');
+    el.className = 'toast' + (type==='error'?' error':'');
+    el.textContent = msg;
+    els.toastStack.appendChild(el);
+    setTimeout(()=>{ el.style.transition='opacity .3s ease'; el.style.opacity='0'; setTimeout(()=>el.remove(),300); }, 2800);
+  }
+  function celebrate(){
+    const colors=['#2FD892','#F2B84B','#9B8CFF','#5B9BD9','#FF8FA8'];
+    for(let i=0;i<28;i++){
+      const c=document.createElement('div');
+      c.className='confetti';
+      c.style.left = Math.random()*100+'vw';
+      c.style.background = colors[Math.floor(Math.random()*colors.length)];
+      c.style.animationDuration = (2+Math.random()*1.4)+'s';
+      c.style.opacity = String(0.7+Math.random()*0.3);
+      document.body.appendChild(c);
+      setTimeout(()=>c.remove(), 3700);
+    }
+  }
+
+  // ---------- render ----------
+  function render(){
+    renderStats();
+    renderFunnel();
+    renderFilters();
+    renderTable();
+  }
+
+  function renderStats(){
+    const implantadas = state.vendas.filter(v=>v.status==='Implantado');
+    const valorEntrada = sum(state.vendas.map(v=>v.valor));
+    const valorImplantado = sum(implantadas.map(v=>v.valor));
+    const corretoresAtivos = new Set(state.vendas.map(v=>v.corretor.trim().toLowerCase())).size;
+    els.stats.innerHTML = `
+      <div class="stat-card accent"><div class="label">Valor de entrada</div><div class="value">${fmtCurrency(valorEntrada)}</div></div>
+      <div class="stat-card gold"><div class="label">Valor implantado</div><div class="value">${fmtCurrency(valorImplantado)}</div></div>
+      <div class="stat-card"><div class="label">Vendas implantadas</div><div class="value">${implantadas.length}</div></div>
+      <div class="stat-card"><div class="label">Corretores ativos</div><div class="value">${corretoresAtivos}</div></div>
+    `;
+  }
+
+  function renderFunnel(){
+    if(state.vendas.length===0){
+      els.funnel.innerHTML = `<div class="empty-mini">Nenhuma venda ainda.</div>`;
+      return;
+    }
+    const stages = STATUS_LIST.map(s=>{
+      const items = state.vendas.filter(v=>v.status===s.key);
+      return {key:s.key, color:s.color, count:items.length, valor:sum(items.map(v=>v.valor))};
+    });
+    const maxCount = Math.max(1, ...stages.map(s=>s.count));
+    els.funnel.innerHTML = stages.map(s=>{
+      const pct = Math.round(s.count/maxCount*100);
+      const active = state.filters.status===s.key;
+      return `<div class="funnel-row ${active?'active':''}" data-status="${escapeHtml(s.key)}">
+        <div class="funnel-row-top">
+          <div class="funnel-label"><span class="funnel-dot" style="background:${s.color}"></span>${s.key}</div>
+          <div class="funnel-count" style="color:${s.color}">${s.count} ${s.count===1?'proposta':'propostas'}</div>
+        </div>
+        <div class="funnel-bar-track"><div class="funnel-bar-fill" style="width:${pct}%; background:${s.color}"></div></div>
+        <div class="funnel-row-bottom"><span class="funnel-valor">${fmtCurrency(s.valor)}</span></div>
+      </div>`;
+    }).join('');
+  }
+
+  function fillSelect(sel, options, selected){
+    sel.innerHTML = options.map(o=>`<option value="${escapeHtml(o.key)}">${escapeHtml(o.label)}</option>`).join('');
+    sel.value = selected || '';
+  }
+  function renderFilters(){
+    const operadoras = uniqueSorted(state.vendas.map(v=>v.operadora));
+    const corretores = uniqueSorted(state.vendas.map(v=>v.corretor));
+    fillSelect(els.filterPorte, [{key:'',label:'Porte'}, ...PORTE_LIST.map(p=>({key:p.key,label:p.key}))], state.filters.porte);
+    fillSelect(els.filterOperadora, [{key:'',label:'Operadora'}, ...operadoras.map(o=>({key:o,label:o}))], state.filters.operadora);
+    fillSelect(els.filterCorretor, [{key:'',label:'Corretor'}, ...corretores.map(c=>({key:c,label:c}))], state.filters.corretor);
+    fillSelect(els.filterStatus, [{key:'',label:'Status'}, ...STATUS_LIST.map(s=>({key:s.key,label:s.key}))], state.filters.status);
+  }
+
+  function getFiltered(){
+    let list = state.vendas.slice();
+    const f = state.filters;
+    if(f.search){
+      const q = f.search.toLowerCase();
+      list = list.filter(v => v.empresa.toLowerCase().includes(q) || v.numeroProposta.toLowerCase().includes(q) || v.corretor.toLowerCase().includes(q));
+    }
+    if(f.porte) list = list.filter(v=>v.porte===f.porte);
+    if(f.operadora) list = list.filter(v=>v.operadora===f.operadora);
+    if(f.corretor) list = list.filter(v=>v.corretor===f.corretor);
+    if(f.status) list = list.filter(v=>v.status===f.status);
+    const {col,dir} = state.sort;
+    list.sort((a,b)=>{
+      let av=a[col], bv=b[col];
+      if(col==='valor'){ /* numeric already */ }
+      else if(col==='dataEmissao'){ av=new Date(av).getTime(); bv=new Date(bv).getTime(); }
+      else { av=(av||'').toString().toLowerCase(); bv=(bv||'').toString().toLowerCase(); }
+      if(av<bv) return dir==='asc'?-1:1;
+      if(av>bv) return dir==='asc'?1:-1;
+      return 0;
+    });
+    return list;
+  }
+
+  function rowHtml(v){
+    const confirming = state.confirmDeleteId === v.id;
+    const statusColor = getStatusColor(v.status);
+    const porteColor = getPorteColor(v.porte);
+    return `<tr>
+      <td>${escapeHtml(v.numeroProposta)}</td>
+      <td>${escapeHtml(v.empresa)}${(v.porte==='Adesão' && v.dataVigencia) ? `<div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Vigência: ${fmtDateBR(v.dataVigencia)}</div>` : ''}</td>
+      <td>${v.porte ? `<span class="badge" style="background:${hexA(porteColor,0.15)}; color:${porteColor}">${escapeHtml(v.porte)}</span>` : `<span style="color:var(--text-faint); font-size:12px;">Não informado</span>`}</td>
+      <td>${escapeHtml(v.operadora)}</td>
+      <td>${escapeHtml(v.corretor)}</td>
+      <td>${fmtCurrency(v.valor)}</td>
+      <td>${fmtDateBR(v.dataEmissao)}</td>
+      <td><select class="status-select" data-id="${v.id}" style="background:${hexA(statusColor,0.15)}; color:${statusColor}; border:1px solid ${hexA(statusColor,0.4)};">${STATUS_LIST.map(s=>`<option value="${escapeHtml(s.key)}" ${s.key===v.status?'selected':''}>${escapeHtml(s.key)}</option>`).join('')}</select></td>
+      <td>
+        ${confirming
+          ? `<div class="confirm-row">Excluir?<button class="confirm-yes" data-action="confirm-yes" data-id="${v.id}">Sim</button><button class="confirm-no" data-action="confirm-no" data-id="${v.id}">Não</button></div>`
+          : `<div class="row-actions"><button class="icon-btn" data-action="edit" data-id="${v.id}" title="Editar">${ICONS.edit}</button><button class="icon-btn danger" data-action="delete" data-id="${v.id}" title="Excluir">${ICONS.trash}</button></div>`}
+      </td>
+    </tr>`;
+  }
+
+  function renderTable(){
+    const list = getFiltered();
+    els.theadRow.innerHTML = COLUMNS.map(c=>{
+      const sorted = state.sort.col===c.key;
+      const arrow = sorted ? (state.sort.dir==='asc'?' ▲':' ▼') : '';
+      return `<th data-col="${c.key}" class="${sorted?'sorted':''}">${c.label}${arrow}</th>`;
+    }).join('') + '<th style="text-align:right">Ações</th>';
+
+    if(list.length===0){
+      const trulyEmpty = state.vendas.length===0;
+      els.tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state">
+        <svg viewBox="0 0 24 24" width="38" height="38" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>
+        <p>${trulyEmpty? 'Nenhuma venda registrada ainda.' : 'Nenhum resultado para os filtros aplicados.'}</p>
+        <p class="cta" id="${trulyEmpty?'emptyNovo':'emptyClear'}">${trulyEmpty? '+ Registrar a primeira venda' : 'Limpar filtros'}</p>
+      </div></td></tr>`;
+    } else {
+      els.tbody.innerHTML = list.map(rowHtml).join('');
+    }
+  }
+
+  function clearFilters(){
+    state.filters = {search:'', porte:'', operadora:'', corretor:'', status:''};
+    els.searchInput.value = '';
+    renderFilters();
+    renderFunnel();
+    renderTable();
+  }
+
+  // ---------- modal ----------
+  function ensureStaticSelectOptions(){
+    els.inputPorte.innerHTML = PORTE_LIST.map(p=>`<option value="${p.key}">${p.key}</option>`).join('');
+    els.inputStatus.innerHTML = STATUS_LIST.map(s=>`<option value="${s.key}">${s.key}</option>`).join('');
+  }
+  function populateDatalists(){
+    els.listOperadoras.innerHTML = uniqueSorted(state.vendas.map(v=>v.operadora)).map(o=>`<option value="${escapeHtml(o)}">`).join('');
+    els.listCorretores.innerHTML = uniqueSorted(state.vendas.map(v=>v.corretor)).map(o=>`<option value="${escapeHtml(o)}">`).join('');
+  }
+  function updateContextualFields(){
+    const porte = els.inputPorte.value;
+    els.labelEmpresa.textContent = porte === 'PME' ? 'Empresa' : 'Nome do cliente';
+    const isAdesao = porte === 'Adesão';
+    els.fieldVigencia.style.display = isAdesao ? '' : 'none';
+    if(!isAdesao) els.inputVigencia.value = '';
+  }
+  function openModal(mode, venda){
+    state.modal = {mode, editId: venda ? venda.id : null};
+    els.modalTitle.textContent = mode==='edit' ? 'Editar venda' : 'Nova venda';
+    els.vendaForm.reset();
+    populateDatalists();
+    if(venda){
+      els.inputPorte.value = venda.porte;
+      els.inputOperadora.value = venda.operadora;
+      els.inputEmpresa.value = venda.empresa;
+      els.inputValor.value = venda.valor.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+      els.inputValor.dataset.raw = String(venda.valor);
+      els.inputData.value = venda.dataEmissao;
+      els.inputCorretor.value = venda.corretor;
+      els.inputStatus.value = venda.status;
+      els.inputNumero.value = venda.numeroProposta;
+      els.inputVigencia.value = venda.dataVigencia || '';
+    } else {
+      els.inputValor.value = '';
+      els.inputValor.dataset.raw = '0';
+      els.inputStatus.value = STATUS_LIST[0].key;
+      els.inputPorte.value = PORTE_LIST[0].key;
+      els.inputVigencia.value = '';
+    }
+    updateContextualFields();
+    els.overlay.classList.add('open');
+    setTimeout(()=>els.inputPorte.focus(), 60);
+  }
+  function closeModal(){ els.overlay.classList.remove('open'); }
+
+  // ---------- events ----------
+  function bindEvents(){
+    els.btnNovo.addEventListener('click', ()=>openModal('novo'));
+    els.btnCloseModal.addEventListener('click', closeModal);
+    els.btnCancelModal.addEventListener('click', closeModal);
+    els.overlay.addEventListener('click', e=>{ if(e.target===els.overlay) closeModal(); });
+
+    els.inputValor.addEventListener('input', maskCurrencyInput);
+    els.inputPorte.addEventListener('change', updateContextualFields);
+
+    els.vendaForm.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      if(!els.vendaForm.checkValidity()){ els.vendaForm.reportValidity(); return; }
+      const raw = parseFloat(els.inputValor.dataset.raw || '0');
+      if(!raw || raw<=0){ showToast('Informe um valor válido.', 'error'); els.inputValor.focus(); return; }
+      const porteVal = els.inputPorte.value;
+      const data = {
+        porte: porteVal,
+        operadora: els.inputOperadora.value.trim(),
+        empresa: els.inputEmpresa.value.trim(),
+        valor: raw,
+        dataEmissao: els.inputData.value,
+        corretor: els.inputCorretor.value.trim(),
+        status: els.inputStatus.value,
+        numeroProposta: els.inputNumero.value.trim(),
+        dataVigencia: porteVal === 'Adesão' ? (els.inputVigencia.value || '') : '',
+      };
+      const isEdit = state.modal.mode==='edit';
+      if(isEdit){
+        const idx = state.vendas.findIndex(v=>v.id===state.modal.editId);
+        if(idx>-1) state.vendas[idx] = Object.assign({}, state.vendas[idx], data, {updatedAt:Date.now()});
+      } else {
+        state.vendas.push(Object.assign({id:uid(), createdAt:Date.now(), updatedAt:Date.now()}, data));
+      }
+      closeModal();
+      render();
+      await persistVendas();
+      showToast(isEdit ? 'Venda atualizada.' : 'Venda registrada.');
+      if(data.status==='Implantado') celebrate();
+    });
+
+    els.tbody.addEventListener('click', e=>{
+      const btn = e.target.closest('[data-action]');
+      if(btn){
+        const action = btn.dataset.action, id = btn.dataset.id;
+        if(action==='edit'){
+          const v = state.vendas.find(x=>x.id===id);
+          if(v) openModal('edit', v);
+        } else if(action==='delete'){
+          state.confirmDeleteId = id;
+          renderTable();
+        } else if(action==='confirm-yes'){
+          state.vendas = state.vendas.filter(x=>x.id!==id);
+          state.confirmDeleteId = null;
+          render();
+          persistVendas();
+          showToast('Venda excluída.');
+        } else if(action==='confirm-no'){
+          state.confirmDeleteId = null;
+          renderTable();
+        }
+        return;
+      }
+      if(e.target.id==='emptyNovo' || e.target.closest('#emptyNovo')){ openModal('novo'); }
+      if(e.target.id==='emptyClear' || e.target.closest('#emptyClear')){ clearFilters(); }
+    });
+
+    els.tbody.addEventListener('change', async e=>{
+      const sel = e.target.closest('.status-select');
+      if(!sel) return;
+      const id = sel.dataset.id;
+      const v = state.vendas.find(x=>x.id===id);
+      if(!v) return;
+      const oldStatus = v.status;
+      const newStatus = sel.value;
+      if(oldStatus===newStatus) return;
+      v.status = newStatus;
+      v.updatedAt = Date.now();
+      render();
+      await persistVendas();
+      showToast('Status atualizado.');
+      if(newStatus==='Implantado' && oldStatus!=='Implantado') celebrate();
+    });
+
+    els.theadRow.addEventListener('click', e=>{
+      const th = e.target.closest('th[data-col]');
+      if(!th) return;
+      const col = th.dataset.col;
+      if(state.sort.col===col) state.sort.dir = state.sort.dir==='asc'?'desc':'asc';
+      else { state.sort.col=col; state.sort.dir='asc'; }
+      renderTable();
+    });
+
+    els.searchInput.addEventListener('input', e=>{ state.filters.search = e.target.value; renderTable(); });
+    els.filterPorte.addEventListener('change', e=>{ state.filters.porte = e.target.value; renderTable(); });
+    els.filterOperadora.addEventListener('change', e=>{ state.filters.operadora = e.target.value; renderTable(); });
+    els.filterCorretor.addEventListener('change', e=>{ state.filters.corretor = e.target.value; renderTable(); });
+    els.filterStatus.addEventListener('change', e=>{ state.filters.status = e.target.value; renderTable(); renderFunnel(); });
+    els.btnLimparFiltros.addEventListener('click', clearFilters);
+
+    els.funnel.addEventListener('click', e=>{
+      const row = e.target.closest('.funnel-row');
+      if(!row) return;
+      const s = row.dataset.status;
+      state.filters.status = state.filters.status===s ? '' : s;
+      els.filterStatus.value = state.filters.status;
+      renderTable();
+      renderFunnel();
+    });
+
+    els.btnReset.addEventListener('click', ()=>els.resetOverlay.classList.add('open'));
+    els.btnCancelReset.addEventListener('click', ()=>els.resetOverlay.classList.remove('open'));
+    els.resetOverlay.addEventListener('click', e=>{ if(e.target===els.resetOverlay) els.resetOverlay.classList.remove('open'); });
+    els.btnConfirmReset.addEventListener('click', async ()=>{
+      state.vendas = [];
+      state.filters = {search:'', porte:'', operadora:'', corretor:'', status:''};
+      state.sort = {col:'dataEmissao', dir:'desc'};
+      state.confirmDeleteId = null;
+      els.searchInput.value = '';
+      els.resetOverlay.classList.remove('open');
+      render();
+      await persistVendas();
+      showToast('Base de dados zerada.');
+    });
+
+    document.addEventListener('keydown', e=>{
+      if(e.key==='Escape'){
+        if(els.overlay.classList.contains('open')) closeModal();
+        if(els.resetOverlay.classList.contains('open')) els.resetOverlay.classList.remove('open');
+      }
+    });
+  }
+
+  bindEvents();
+  loadAll();
+})();
+</script>
+</body>
+</html>
