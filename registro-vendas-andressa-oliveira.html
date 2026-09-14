@@ -56,6 +56,10 @@
   .btn-ghost{background:none; border:none; color:var(--text-muted); font-size:12.5px; cursor:pointer; text-decoration:underline; text-underline-offset:3px; padding:0;}
   .btn-ghost:hover{color:var(--coral);}
 
+  .period-tabs{display:flex; gap:8px; margin-bottom:12px;}
+  .period-tab{background:var(--surface); border:1px solid var(--border); color:var(--text-muted); padding:7px 16px; border-radius:100px; font-size:12.5px; font-weight:600; cursor:pointer; font-family:var(--font-body);}
+  .period-tab:hover{color:var(--text);}
+  .period-tab.active{background:var(--accent); color:#07130D; border-color:var(--accent);}
   .stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; margin-bottom:22px;}
   .stat-card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:18px 20px;}
   .stat-card .label{font-size:12.5px; color:var(--text-muted); margin-bottom:8px;}
@@ -158,6 +162,11 @@
       </button>
     </header>
 
+    <div class="period-tabs" id="periodTabs">
+      <button class="period-tab active" data-period="total">Total geral</button>
+      <button class="period-tab" data-period="mes">Este mês</button>
+      <button class="period-tab" data-period="mesPassado">Mês passado</button>
+    </div>
     <div class="stats" id="stats"></div>
 
     <div class="panel">
@@ -325,11 +334,12 @@
     sort: {col:'dataEmissao', dir:'desc'},
     modal: {mode:'novo', editId:null},
     confirmDeleteId: null,
+    period: 'total',
   };
 
   // ---------- refs ----------
   const els = {
-    stats:$('stats'), funnel:$('funnel'),
+    stats:$('stats'), funnel:$('funnel'), periodTabs:$('periodTabs'),
     searchInput:$('searchInput'), filterPorte:$('filterPorte'), filterOperadora:$('filterOperadora'),
     filterCorretor:$('filterCorretor'), filterStatus:$('filterStatus'), btnLimparFiltros:$('btnLimparFiltros'),
     theadRow:$('theadRow'), tbody:$('tbody'),
@@ -440,11 +450,30 @@
     renderTable();
   }
 
+  function getPeriodVendas(){
+    if(state.period==='total') return state.vendas;
+    const now = new Date();
+    let start, end;
+    if(state.period==='mes'){
+      start = new Date(now.getFullYear(), now.getMonth(), 1);
+      end = new Date(now.getFullYear(), now.getMonth()+1, 1);
+    } else {
+      start = new Date(now.getFullYear(), now.getMonth()-1, 1);
+      end = new Date(now.getFullYear(), now.getMonth(), 1);
+    }
+    return state.vendas.filter(v=>{
+      if(!v.dataEmissao) return false;
+      const d = new Date(v.dataEmissao+'T00:00:00');
+      return d>=start && d<end;
+    });
+  }
+
   function renderStats(){
-    const implantadas = state.vendas.filter(v=>v.status==='Implantado');
-    const valorEntrada = sum(state.vendas.map(v=>v.valor));
+    const periodVendas = getPeriodVendas();
+    const implantadas = periodVendas.filter(v=>v.status==='Implantado');
+    const valorEntrada = sum(periodVendas.map(v=>v.valor));
     const valorImplantado = sum(implantadas.map(v=>v.valor));
-    const corretoresAtivos = new Set(state.vendas.map(v=>v.corretor.trim().toLowerCase())).size;
+    const corretoresAtivos = new Set(periodVendas.map(v=>v.corretor.trim().toLowerCase())).size;
     els.stats.innerHTML = `
       <div class="stat-card accent"><div class="label">Valor de entrada</div><div class="value">${fmtCurrency(valorEntrada)}</div></div>
       <div class="stat-card gold"><div class="label">Valor implantado</div><div class="value">${fmtCurrency(valorImplantado)}</div></div>
@@ -454,12 +483,13 @@
   }
 
   function renderFunnel(){
-    if(state.vendas.length===0){
-      els.funnel.innerHTML = `<div class="empty-mini">Nenhuma venda ainda.</div>`;
+    const periodVendas = getPeriodVendas();
+    if(periodVendas.length===0){
+      els.funnel.innerHTML = `<div class="empty-mini">Nenhuma venda neste período.</div>`;
       return;
     }
     const stages = STATUS_LIST.map(s=>{
-      const items = state.vendas.filter(v=>v.status===s.key);
+      const items = periodVendas.filter(v=>v.status===s.key);
       return {key:s.key, color:s.color, count:items.length, valor:sum(items.map(v=>v.valor))};
     });
     const maxCount = Math.max(1, ...stages.map(s=>s.count));
@@ -720,6 +750,15 @@
       state.filters.status = state.filters.status===s ? '' : s;
       els.filterStatus.value = state.filters.status;
       renderTable();
+      renderFunnel();
+    });
+
+    els.periodTabs.addEventListener('click', e=>{
+      const btn = e.target.closest('.period-tab');
+      if(!btn) return;
+      state.period = btn.dataset.period;
+      els.periodTabs.querySelectorAll('.period-tab').forEach(b=>b.classList.toggle('active', b===btn));
+      renderStats();
       renderFunnel();
     });
 
