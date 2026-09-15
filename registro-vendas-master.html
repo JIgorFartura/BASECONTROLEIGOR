@@ -84,6 +84,12 @@
   .funnel-valor{font-size:12px; color:var(--text-muted);}
   .empty-mini{color:var(--text-faint); font-size:13px; padding:8px 0;}
 
+  .team-stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px;}
+  .team-card{background:var(--surface-2); border:1px solid var(--border); border-top:3px solid var(--border); border-radius:var(--radius-md); padding:16px 18px;}
+  .team-card .team-name{font-family:var(--font-display); font-size:14px; font-weight:600; margin-bottom:10px;}
+  .team-metric{display:flex; justify-content:space-between; align-items:baseline; padding:4px 0; font-size:12.5px; color:var(--text-muted);}
+  .team-metric .val{font-family:var(--font-display); font-weight:600; color:var(--text); font-size:14px;}
+
   .toolbar{display:flex; flex-wrap:wrap; gap:10px; margin-bottom:14px; align-items:center;}
   .search-box{position:relative; flex:1; min-width:200px;}
   .search-box input{width:100%; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px 14px 10px 36px; color:var(--text); font-size:13.5px; font-family:var(--font-body);}
@@ -168,6 +174,11 @@
     <div class="panel">
       <h2>Funil por status</h2>
       <div class="funnel" id="funnel"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Por equipe</h2>
+      <div class="team-stats" id="teamStats"></div>
     </div>
 
     <div class="toolbar">
@@ -269,7 +280,7 @@
 
   // ---------- refs ----------
   const els = {
-    stats:$('stats'), funnel:$('funnel'), periodTabs:$('periodTabs'),
+    stats:$('stats'), funnel:$('funnel'), periodTabs:$('periodTabs'), teamStats:$('teamStats'),
     searchInput:$('searchInput'), filterEquipe:$('filterEquipe'), filterPorte:$('filterPorte'), filterOperadora:$('filterOperadora'),
     filterCorretor:$('filterCorretor'), filterStatus:$('filterStatus'), btnLimparFiltros:$('btnLimparFiltros'),
     theadRow:$('theadRow'), tbody:$('tbody'),
@@ -340,6 +351,7 @@
   function render(){
     renderStats();
     renderFunnel();
+    renderTeamStats();
     renderFilters();
     renderTable();
   }
@@ -405,6 +417,22 @@
     sel.innerHTML = options.map(o=>`<option value="${escapeHtml(o.key)}">${escapeHtml(o.label)}</option>`).join('');
     sel.value = selected || '';
   }
+  function renderTeamStats(){
+    const periodVendas = getPeriodVendas();
+    els.teamStats.innerHTML = SOURCES.map(s=>{
+      const items = periodVendas.filter(v=>v._origem===s.name);
+      const implantadas = items.filter(v=>v.status==='Implantado');
+      const valorEntrada = sum(items.map(v=>v.valor));
+      const valorImplantado = sum(implantadas.map(v=>v.valor));
+      return `<div class="team-card" style="border-top-color:${s.color}">
+        <div class="team-name" style="color:${s.color}">${escapeHtml(s.name)}</div>
+        <div class="team-metric"><span>Valor de entrada</span><span class="val">${fmtCurrency(valorEntrada)}</span></div>
+        <div class="team-metric"><span>Valor implantado</span><span class="val">${fmtCurrency(valorImplantado)}</span></div>
+        <div class="team-metric"><span>Implantadas</span><span class="val">${implantadas.length}</span></div>
+      </div>`;
+    }).join('');
+  }
+
   function renderFilters(){
     const operadoras = uniqueSorted(state.vendas.map(v=>v.operadora));
     const corretores = uniqueSorted(state.vendas.map(v=>v.corretor));
@@ -524,6 +552,7 @@
       els.periodTabs.querySelectorAll('.period-tab').forEach(b=>b.classList.toggle('active', b===btn));
       renderStats();
       renderFunnel();
+      renderTeamStats();
     });
 
     els.btnLock.addEventListener('click', ()=>{
