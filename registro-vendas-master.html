@@ -291,7 +291,17 @@
   // ---------- helpers ----------
   function sum(arr){ return arr.reduce((a,b)=>a+b,0); }
   function fmtCurrency(n){ return (n||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); }
-  function fmtDateBR(iso){ if(!iso) return '—'; const p=iso.split('-'); return p.length===3? `${p[2]}/${p[1]}/${p[0]}` : iso; }
+  function toISODate(v){
+    if(!v) return '';
+    if(v instanceof Date) return isNaN(v) ? '' : v.getFullYear()+'-'+String(v.getMonth()+1).padStart(2,'0')+'-'+String(v.getDate()).padStart(2,'0');
+    const s = String(v).trim();
+    const m = s.match(/^(\d{4}-\d{2}-\d{2})/);
+    if(m) return m[1];
+    const d = new Date(s);
+    if(!isNaN(d)) return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    return '';
+  }
+  function fmtDateBR(iso){ const clean=toISODate(iso); if(!clean) return '—'; const p=clean.split('-'); return p.length===3? `${p[2]}/${p[1]}/${p[0]}` : clean; }
   function escapeHtml(str){ return String(str ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
   function hexA(hex,a){ const h=hex.replace('#',''); const r=parseInt(h.substring(0,2),16), g=parseInt(h.substring(2,4),16), b=parseInt(h.substring(4,6),16); return `rgba(${r},${g},${b},${a})`; }
   function getStatusColor(k){ const s=STATUS_LIST.find(s=>s.key===k); return s?s.color:'#888'; }
@@ -304,7 +314,11 @@
       const res = await fetch(source.url + '?action=list', { method:'GET', cache:'no-store' });
       if(!res.ok) throw new Error('http '+res.status);
       const data = await res.json();
-      return (data.vendas||[]).map(v=>Object.assign({}, v, { _origem:source.name, _origemCor:source.color }));
+      return (data.vendas||[]).map(v=>Object.assign({}, v, {
+        dataEmissao: toISODate(v.dataEmissao),
+        dataVigencia: toISODate(v.dataVigencia),
+        _origem:source.name, _origemCor:source.color
+      }));
     }catch(e){
       return { _erro:source.name };
     }
@@ -368,8 +382,9 @@
       end = new Date(now.getFullYear(), now.getMonth(), 1);
     }
     return state.vendas.filter(v=>{
-      if(!v.dataEmissao) return false;
-      const d = new Date(v.dataEmissao+'T00:00:00');
+      const iso = toISODate(v.dataEmissao);
+      if(!iso) return false;
+      const d = new Date(iso+'T00:00:00');
       return d>=start && d<end;
     });
   }
