@@ -1163,10 +1163,16 @@
     });
     const nomes = [...grupos.values()].map(g=>[...g.entries()].sort((a,b)=>b[1]-a[1])[0][0]).sort(ptCmp);
     state.importNomes = nomes;
-    els.regImport.innerHTML = nomes.length
-      ? `<div class="reg-import"><b>${nomes.length} ${nomes.length===1?'corretor com vendas ainda fora':'corretores com vendas ainda fora'} do cadastro:</b> ${nomes.map(escapeHtml).join(', ')}.<br><button type="button" class="row-btn" id="btnImport" style="margin-top:8px;">Cadastrar ${nomes.length===1?'este nome':'todos esses nomes'}</button></div>`
+    const known2 = new Set(state.corretores.map(c=>chave(c.nome)));
+    state.seedNomes = CORRETORES_INICIAIS.map(tituloNome).map(n=>n.replace(/\bLtda\b/,'Ltda')).filter(n=>!known2.has(chave(n)));
+    const seedHtml = state.seedNomes.length
+      ? `<div class="reg-import"><b>Lista inicial de corretores:</b> ${state.seedNomes.length} nomes ainda não cadastrados.<br><button type="button" class="row-btn" id="btnSeed" style="margin-top:8px;">Cadastrar os ${state.seedNomes.length} corretores da lista</button></div>`
       : '';
+    els.regImport.innerHTML = seedHtml + (nomes.length
+      ? `<div class="reg-import"><b>${nomes.length} ${nomes.length===1?'corretor com vendas ainda fora':'corretores com vendas ainda fora'} do cadastro:</b> ${nomes.map(escapeHtml).join(', ')}.<br><button type="button" class="row-btn" id="btnImport" style="margin-top:8px;">Cadastrar ${nomes.length===1?'este nome':'todos esses nomes'}</button></div>`
+      : '');
   }
+  const CORRETORES_INICIAIS = ["THAINA FROUCHE GUTIERREZ DA SILVA", "VICTOR LUIZ ANDRE BARBOSA", "VIVIANE ALVES DE SOUZA", "VIVIANE DE PAULA ALVES BARBOZA", "WANDERSON SANT ANNA MACEDO", "LUCAS AVOLIO PEDROSA", "LUCIANO ABEL PINTO", "MARCOS PAULO PENA DOS SANTOS", "MICHELLE CORREA TELLES VIEIRA", "NONATO SANTANA", "NOVA TEMPUS CORRETORA DE SEGUROS LTDA", "PRICILA LOPES SIMOESDEC", "PRISCILA DE ANDRADE MACEDO", "RONAN ALMEIDA LOPES", "SEG RIO CORRETORA DE SEGUROS", "SILVANA DA SILVA", "SIMONE GARCIA LOBO", "SOFIA PASSOS HOPPE", "SONIA CHRISTINA BOMFIM ALVES FERRAZ MACHADO", "TANIA CELE RODRIGUES DE OLIVEIRA", "ADRIANA SAMPAIO CUNHA DA COSTA", "ADRIELLY TELES DOS SANTOS ALMEIDA DANTAS", "ALEX SANDRO FONSECA SILVA", "ARTUR JOSE CARVALHO", "BRUNO RAVASCO ALMEIDA", "CARLOS HENRIQUE BESCAINO", "ELISABETE FERREIRA DO PRADO", "GABRIEL KIRK ANDRADE", "GABRIEL RODRIGUES REPEZZA", "GEISON MANOEL DOS SANTOS LEMOS", "RAFAEL CAVALCANTI VIMERCATI", "JOSE IGOR FARTURA", "LEANDRO MACIEL DA SILVA", "LEO FELIPE BARBOSA MIRANDA", "LUCAS AMANTEA MOREIRA"];
   function addCorretor(nome){
     state.corretores.push({nome, ativo:true});
     state.vendas.forEach(v=>{ v.corretor = canonCorretor(v.corretor); });
@@ -1233,6 +1239,12 @@
       render();
     });
     els.regImport.addEventListener('click', e=>{
+      if(e.target.closest('#btnSeed')){
+        (state.seedNomes||[]).forEach(addCorretor);
+        regMsg('Cadastrando os corretores da lista. O aviso no topo mostra quando terminar de salvar.', 'ok');
+        render();
+        return;
+      }
       if(!e.target.closest('#btnImport')) return;
       (state.importNomes||[]).forEach(addCorretor);
       regMsg('Corretores cadastrados a partir das vendas existentes.', 'ok');
