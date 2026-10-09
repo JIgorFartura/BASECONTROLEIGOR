@@ -331,6 +331,7 @@
       return (data.vendas||[]).map(v=>Object.assign({}, v, {
         dataEmissao: toISODate(v.dataEmissao),
         dataVigencia: toISODate(v.dataVigencia),
+        dataImplantacao: toISODate(v.dataImplantacao),
         _origem:source.name, _origemCor:source.color
       }));
     }catch(e){
@@ -387,13 +388,27 @@
 
   const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
   const MESES_LONGO = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  function inMonth(iso, y, m){
+    return !!iso && parseInt(iso.slice(0,4),10)===y && (parseInt(iso.slice(5,7),10)-1)===m;
+  }
   function vendasDoMes(y, m){
-    return state.vendas.filter(v=>{
-      const iso = toISODate(v.dataEmissao);
-      return iso && parseInt(iso.slice(0,4),10)===y && (parseInt(iso.slice(5,7),10)-1)===m;
-    });
+    return state.vendas.filter(v=>inMonth(toISODate(v.dataEmissao), y, m));
+  }
+  // Implantação conta no mês em que a venda virou "Implantado" (vendas antigas, sem essa data, usam a emissão)
+  function dataImpl(v){
+    return v.status==='Implantado' ? (toISODate(v.dataImplantacao) || toISODate(v.dataEmissao)) : '';
+  }
+  function implantadasDoMes(y, m){
+    return state.vendas.filter(v=>inMonth(dataImpl(v), y, m));
   }
   function getPeriodVendas(){ return vendasDoMes(state.year, state.month); }
+  function getImplantadasPeriod(){ return implantadasDoMes(state.year, state.month); }
+  function todayISO(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+  function calcDataImplantacao(prev, newStatus){
+    if(newStatus!=='Implantado') return '';
+    if(prev && prev.status==='Implantado') return prev.dataImplantacao || '';
+    return todayISO();
+  }
 
   function fmtCompact(n){
     if(n>=1e6) return 'R$ '+(n/1e6).toFixed(1).replace('.',',')+'M';
@@ -434,7 +449,7 @@
 
   function renderStats(){
     const periodVendas = getPeriodVendas();
-    const implantadas = periodVendas.filter(v=>v.status==='Implantado');
+    const implantadas = getImplantadasPeriod();
     const valorEntrada = sum(periodVendas.map(v=>v.valor));
     const valorImplantado = sum(implantadas.map(v=>v.valor));
     const corretoresAtivos = new Set(periodVendas.map(v=>v.corretor.trim().toLowerCase())).size;
@@ -448,12 +463,13 @@
 
   function renderFunnel(){
     const periodVendas = getPeriodVendas();
-    if(periodVendas.length===0){
+    const implPeriod = getImplantadasPeriod();
+    if(periodVendas.length===0 && implPeriod.length===0){
       els.funnel.innerHTML = `<div class="empty-mini">Nenhuma venda neste período.</div>`;
       return;
     }
     const stages = STATUS_LIST.map(s=>{
-      const items = periodVendas.filter(v=>v.status===s.key);
+      const items = s.key==='Implantado' ? implPeriod : periodVendas.filter(v=>v.status===s.key);
       return {key:s.key, color:s.color, count:items.length, valor:sum(items.map(v=>v.valor))};
     });
     const maxCount = Math.max(1, ...stages.map(s=>s.count));
@@ -479,7 +495,7 @@
     const periodVendas = getPeriodVendas();
     els.teamStats.innerHTML = SOURCES.map(s=>{
       const items = periodVendas.filter(v=>v._origem===s.name);
-      const implantadas = items.filter(v=>v.status==='Implantado');
+      const implantadas = getImplantadasPeriod().filter(v=>v._origem===s.name);
       const valorEntrada = sum(items.map(v=>v.valor));
       const valorImplantado = sum(implantadas.map(v=>v.valor));
       return `<div class="team-card" style="border-top-color:${s.color}">
