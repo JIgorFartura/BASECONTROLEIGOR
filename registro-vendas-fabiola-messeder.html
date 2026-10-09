@@ -56,10 +56,27 @@
   .btn-ghost{background:none; border:none; color:var(--text-muted); font-size:12.5px; cursor:pointer; text-decoration:underline; text-underline-offset:3px; padding:0;}
   .btn-ghost:hover{color:var(--coral);}
 
-  .period-tabs{display:flex; gap:8px; margin-bottom:12px;}
-  .period-tab{background:var(--surface); border:1px solid var(--border); color:var(--text-muted); padding:7px 16px; border-radius:100px; font-size:12.5px; font-weight:600; cursor:pointer; font-family:var(--font-body);}
-  .period-tab:hover{color:var(--text);}
-  .period-tab.active{background:var(--accent); color:#07130D; border-color:var(--accent);}
+  .months-wrap{margin-bottom:16px;}
+  .year-bar{display:flex; align-items:center; gap:6px; margin-bottom:8px;}
+  .year-nav{background:none; border:none; color:var(--text-faint); width:24px; height:24px; border-radius:50%; font-size:16px; line-height:1; cursor:pointer;}
+  .year-nav:hover{color:var(--accent);}
+  .year-label{font-family:var(--font-display); font-size:14px; font-weight:700; color:var(--text-muted);}
+  .period-now{margin-left:auto; font-size:12px; color:var(--text-faint);}
+  .months-grid{display:grid; grid-template-columns:repeat(12,1fr); gap:6px;}
+  @media(max-width:760px){.months-grid{grid-template-columns:repeat(6,1fr);}}
+  .month-tile{position:relative; background:transparent; border:1px solid var(--border); border-radius:var(--radius-sm); padding:7px 4px 6px; text-align:center; cursor:pointer; color:var(--text); font-family:var(--font-body); transition:border-color .15s ease, background .15s ease; min-width:0;}
+  .month-tile:hover{border-color:var(--accent);}
+  .month-tile .m-name{font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--text-faint);}
+  .month-tile .m-value{font-size:12px; font-weight:600; margin:3px 0 5px; white-space:nowrap;}
+  .month-tile .m-bar{height:3px; border-radius:100px; background:var(--border); overflow:hidden; margin:0 4px;}
+  .month-tile .m-bar i{display:block; height:100%; background:var(--accent);}
+  .month-tile.best .m-bar i{background:var(--gold);}
+  .month-tile.best .m-name::after{content:' ★'; color:var(--gold);}
+  .month-tile.now .m-name{color:var(--accent);}
+  .month-tile.future{opacity:.45;}
+  .month-tile.empty .m-value{color:var(--text-faint); font-weight:400;}
+  .month-tile.active{border-color:var(--accent); background:color-mix(in srgb, var(--accent) 12%, transparent);}
+  .month-tile.active .m-name{color:var(--accent);}
   .stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; margin-bottom:22px;}
   .stat-card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:18px 20px;}
   .stat-card .label{font-size:12.5px; color:var(--text-muted); margin-bottom:8px;}
@@ -162,11 +179,7 @@
       </button>
     </header>
 
-    <div class="period-tabs" id="periodTabs">
-      <button class="period-tab active" data-period="total">Total geral</button>
-      <button class="period-tab" data-period="mes">Este mês</button>
-      <button class="period-tab" data-period="mesPassado">Mês passado</button>
-    </div>
+    <div class="months-wrap" id="periodTabs"></div>
     <div class="stats" id="stats"></div>
 
     <div class="panel">
@@ -334,7 +347,8 @@
     sort: {col:'dataEmissao', dir:'desc'},
     modal: {mode:'novo', editId:null},
     confirmDeleteId: null,
-    period: 'total',
+    year: new Date().getFullYear(),
+    month: new Date().getMonth(),
   };
 
   // ---------- refs ----------
@@ -457,29 +471,58 @@
 
   // ---------- render ----------
   function render(){
+    renderMonths();
     renderStats();
     renderFunnel();
     renderFilters();
     renderTable();
   }
 
-  function getPeriodVendas(){
-    if(state.period==='total') return state.vendas;
-    const now = new Date();
-    let start, end;
-    if(state.period==='mes'){
-      start = new Date(now.getFullYear(), now.getMonth(), 1);
-      end = new Date(now.getFullYear(), now.getMonth()+1, 1);
-    } else {
-      start = new Date(now.getFullYear(), now.getMonth()-1, 1);
-      end = new Date(now.getFullYear(), now.getMonth(), 1);
-    }
+  const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const MESES_LONGO = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  function vendasDoMes(y, m){
     return state.vendas.filter(v=>{
       const iso = toISODate(v.dataEmissao);
-      if(!iso) return false;
-      const d = new Date(iso+'T00:00:00');
-      return d>=start && d<end;
+      return iso && parseInt(iso.slice(0,4),10)===y && (parseInt(iso.slice(5,7),10)-1)===m;
     });
+  }
+  function getPeriodVendas(){ return vendasDoMes(state.year, state.month); }
+
+  function fmtCompact(n){
+    if(n>=1e6) return 'R$ '+(n/1e6).toFixed(1).replace('.',',')+'M';
+    if(n>=1e3) return 'R$ '+(n/1e3).toFixed(1).replace('.',',').replace(',0','')+'k';
+    return 'R$ '+Math.round(n);
+  }
+  function renderMonths(){
+    const now = new Date(), y = state.year;
+    const data = MESES.map((_,m)=>{ const l = vendasDoMes(y,m); return {m, valor:sum(l.map(v=>v.valor)), qtd:l.length}; });
+    const max = Math.max(0, ...data.map(d=>d.valor));
+    const best = max>0 ? data.find(d=>d.valor===max).m : -1;
+    const tiles = data.map(d=>{
+      const isNow = y===now.getFullYear() && d.m===now.getMonth();
+      const isFuture = y>now.getFullYear() || (y===now.getFullYear() && d.m>now.getMonth());
+      const pct = max>0 ? Math.round(d.valor/max*100) : 0;
+      const cls = ['month-tile', d.m===state.month?'active':'', d.m===best?'best':'', isNow?'now':'', isFuture?'future':'', d.valor===0?'empty':''].filter(Boolean).join(' ');
+      return `<button type="button" class="${cls}" data-month="${d.m}" title="${MESES_LONGO[d.m]} de ${y}: ${fmtCurrency(d.valor)} · ${d.qtd} ${d.qtd===1?'venda':'vendas'}">
+        <div class="m-name">${MESES[d.m]}</div>
+        <div class="m-value">${d.valor? fmtCompact(d.valor) : '—'}</div>
+        <div class="m-bar"><i style="width:${pct}%"></i></div>
+      </button>`;
+    }).join('');
+    els.periodTabs.innerHTML = `
+      <div class="year-bar">
+        <button type="button" class="year-nav" data-dir="-1" aria-label="Ano anterior">‹</button>
+        <span class="year-label">${y}</span>
+        <button type="button" class="year-nav" data-dir="1" aria-label="Próximo ano">›</button>
+        <span class="period-now">Mostrando ${MESES_LONGO[state.month]} de ${y}</span>
+      </div>
+      <div class="months-grid">${tiles}</div>`;
+  }
+  function refreshPeriod(){
+    renderMonths();
+    renderStats();
+    renderFunnel();
+    
   }
 
   function renderStats(){
@@ -768,12 +811,12 @@
     });
 
     els.periodTabs.addEventListener('click', e=>{
-      const btn = e.target.closest('.period-tab');
-      if(!btn) return;
-      state.period = btn.dataset.period;
-      els.periodTabs.querySelectorAll('.period-tab').forEach(b=>b.classList.toggle('active', b===btn));
-      renderStats();
-      renderFunnel();
+      const nav = e.target.closest('.year-nav');
+      if(nav){ state.year += parseInt(nav.dataset.dir,10); refreshPeriod(); return; }
+      const tile = e.target.closest('.month-tile');
+      if(!tile) return;
+      state.month = parseInt(tile.dataset.month,10);
+      refreshPeriod();
     });
 
     els.btnReset.addEventListener('click', ()=>els.resetOverlay.classList.add('open'));
