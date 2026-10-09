@@ -243,6 +243,7 @@
   .row-btn{background:transparent; border:1px solid var(--border); color:var(--text-muted); border-radius:100px; padding:5px 12px; font-size:12px; font-weight:600; cursor:pointer; font-family:var(--font-body);}
   .row-btn:hover{border-color:var(--accent); color:var(--accent);}
   .row-btn.danger:hover{border-color:var(--coral); color:var(--coral);}
+  .rename-in{background:var(--surface-2); border:1px solid var(--accent); color:var(--text); padding:7px 10px; border-radius:var(--radius-sm); font-size:13.5px; font-family:var(--font-body); width:100%; min-width:200px;}
   .row-btn:disabled{opacity:.4; cursor:not-allowed;}
   .row-btn:disabled:hover{border-color:var(--border); color:var(--text-muted);}
   table.reg{min-width:620px;}
@@ -1144,10 +1145,11 @@
       const vs = state.vendas.filter(v=>chave(v.corretor)===chave(c.nome));
       const impl = sum(vs.filter(v=>v.status==='Implantado' && parseInt(dataImpl(v).slice(0,4),10)===state.year).map(v=>v.valor));
       const cor = c.ativo ? 'var(--accent)' : 'var(--text-muted)';
-      return `<tr class="${c.ativo?'':'inativo'}"><td>${escapeHtml(c.nome)}</td>
+      const editando = state.renaming===c.nome;
+      return `<tr class="${c.ativo?'':'inativo'}"><td>${editando ? `<input class="rename-in" id="renameInput" value="${escapeHtml(c.nome)}" maxlength="60" autocomplete="off">` : escapeHtml(c.nome)}</td>
         <td><span class="badge" style="color:${cor};background:color-mix(in srgb,${cor} 14%,transparent);border:1px solid color-mix(in srgb,${cor} 40%,transparent)">${c.ativo?'Ativo':'Inativo'}</span></td>
         <td class="num">${vs.length}</td><td class="num">${fmtCurrency(impl)}</td>
-        <td class="acts"><button type="button" class="row-btn" data-toggle="${escapeHtml(c.nome)}">${c.ativo?'Inativar':'Reativar'}</button><button type="button" class="row-btn danger" data-remove="${escapeHtml(c.nome)}" ${vs.length?'disabled title="Tem vendas cadastradas. Inative em vez de excluir."':''}>Excluir</button></td></tr>`;
+        <td class="acts">${editando ? `<button type="button" class="row-btn" data-rename-ok="${escapeHtml(c.nome)}">Salvar nome</button><button type="button" class="row-btn" data-rename-cancel="1">Cancelar</button>` : `<button type="button" class="row-btn" data-rename="${escapeHtml(c.nome)}">Renomear</button>`}<button type="button" class="row-btn" data-toggle="${escapeHtml(c.nome)}">${c.ativo?'Inativar':'Reativar'}</button><button type="button" class="row-btn danger" data-remove="${escapeHtml(c.nome)}" ${vs.length?'disabled title="Tem vendas cadastradas. Inative em vez de excluir."':''}>Excluir</button></td></tr>`;
     }).join('');
     const ativos = state.corretores.filter(c=>c.ativo).length;
     els.regList.innerHTML = `<div class="list-head" style="margin-top:6px;"><h2>Corretores cadastrados</h2><span>${ativos} ativos · ${state.corretores.length-ativos} inativos</span></div>
@@ -1166,6 +1168,29 @@
     els.regImport.innerHTML = (nomes.length
       ? `<div class="reg-import"><b>${nomes.length} ${nomes.length===1?'corretor com vendas ainda fora':'corretores com vendas ainda fora'} do cadastro:</b> ${nomes.map(escapeHtml).join(', ')}.<br><button type="button" class="row-btn" id="btnImport" style="margin-top:8px;">Cadastrar ${nomes.length===1?'este nome':'todos esses nomes'}</button></div>`
       : '');
+  }
+  function doRename(antigo){
+    const inp = document.getElementById('renameInput');
+    const nome = tituloNome(inp ? inp.value : '');
+    if(nome.length<3) return regMsg('Digite o nome completo do corretor.', 'err');
+    const c = state.corretores.find(x=>x.nome===antigo);
+    if(!c){ state.renaming=''; return renderCorretoresPage(); }
+    const outro = state.corretores.find(x=>x!==c && chave(x.nome)===chave(nome));
+    if(outro) return regMsg(`"${outro.nome}" já está cadastrado.`, 'err');
+    state.renaming = '';
+    if(nome===antigo){ renderCorretoresPage(); return; }
+    const k = chave(antigo);
+    const afetadas = state.vendas.filter(v=>chave(v.corretor)===k);
+    c.nome = nome;
+    afetadas.forEach(v=>{ v.corretor = nome; v.updatedAt = Date.now(); });
+    if(state.selC===antigo) state.selC = '';
+    if(state.filters.corretor===antigo) state.filters.corretor = '';
+    // primeiro grava o nome novo e as vendas; só no fim remove o nome antigo
+    commit('upsertCorretor', {nome, ativo:c.ativo}, 'corretor renomeado para '+nome);
+    afetadas.forEach(v=>commit('upsert', {venda:v}, 'venda de '+(v.empresa||'')+' com o corretor '+nome));
+    commit('deleteCorretor', {nome:antigo}, 'nome antigo '+antigo+' removido do cadastro');
+    regMsg(`"${antigo}" agora é "${nome}". ${afetadas.length} ${afetadas.length===1?'venda atualizada':'vendas atualizadas'}; acompanhe o aviso no topo até aparecer "Tudo salvo".`, 'ok');
+    render();
   }
   function addCorretor(nome){
     state.corretores.push({nome, ativo:true});
@@ -1218,6 +1243,10 @@
       render();
     });
     els.regList.addEventListener('click', e=>{
+      const rn = e.target.closest('[data-rename]'), rok = e.target.closest('[data-rename-ok]'), rcn = e.target.closest('[data-rename-cancel]');
+      if(rn){ state.renaming = rn.dataset.rename; renderCorretoresPage(); const ri = document.getElementById('renameInput'); if(ri){ ri.focus(); ri.select(); } return; }
+      if(rcn){ state.renaming = ''; renderCorretoresPage(); return; }
+      if(rok){ doRename(rok.dataset.renameOk); return; }
       const t = e.target.closest('[data-toggle]'), r = e.target.closest('[data-remove]');
       if(t){
         const c = state.corretores.find(x=>x.nome===t.dataset.toggle); if(!c) return;
@@ -1231,6 +1260,11 @@
         regMsg(`"${nome}" excluído.`, 'ok');
       } else return;
       render();
+    });
+    els.regList.addEventListener('keydown', e=>{
+      if(!e.target.matches('#renameInput')) return;
+      if(e.key==='Enter'){ e.preventDefault(); doRename(state.renaming); }
+      else if(e.key==='Escape'){ state.renaming = ''; renderCorretoresPage(); }
     });
     els.regImport.addEventListener('click', e=>{
       if(!e.target.closest('#btnImport')) return;
