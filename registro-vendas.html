@@ -722,7 +722,7 @@
     const implantadas = getImplantadasPeriod();
     const valorEntrada = sum(periodVendas.map(v=>v.valor));
     const valorImplantado = sum(implantadas.map(v=>v.valor));
-    const corretoresAtivos = new Set(periodVendas.map(v=>v.corretor.trim().toLowerCase())).size;
+    const corretoresAtivos = new Set(periodVendas.map(v=>String(v.corretor||'').trim().toLowerCase())).size;
     els.stats.innerHTML = `
       <div class="stat-card accent"><div class="label">Valor de entrada</div><div class="value">${fmtCurrency(valorEntrada)}</div></div>
       <div class="stat-card gold"><div class="label">Valor implantado</div><div class="value">${fmtCurrency(valorImplantado)}</div></div>
@@ -776,7 +776,8 @@
     const f = state.filters;
     if(f.search){
       const q = f.search.toLowerCase();
-      list = list.filter(v => v.empresa.toLowerCase().includes(q) || v.numeroProposta.toLowerCase().includes(q) || v.corretor.toLowerCase().includes(q));
+      const qn = semAcento(q);
+      list = list.filter(v => semAcento(v.empresa).includes(qn) || semAcento(v.numeroProposta).includes(qn) || semAcento(v.corretor).includes(qn) || semAcento(v.operadora).includes(qn));
     }
     if(f.porte) list = list.filter(v=>v.porte===f.porte);
     if(f.operadora) list = list.filter(v=>v.operadora===f.operadora);
@@ -1056,7 +1057,7 @@
     return state.rporte ? l.filter(v=>v.porte===state.rporte) : l;
   }
   function getBaseList(){
-    if(state.allMonths) return state.vendas.slice();
+    if(state.allMonths || (state.filters.search||'').trim()) return state.vendas.slice();
     if(state.tab==='rank'){
       let l = baseList();
       if(state.selC) l = l.filter(v=>v.corretor===state.selC);
@@ -1070,6 +1071,7 @@
     const mes = MESES_LONGO[state.month];
     let t;
     if(state.allMonths) t = 'Todas as propostas';
+    else if((state.filters.search||'').trim()) t = 'Resultado da busca em todos os meses';
     else if(state.tab==='rank') t = (state.base==='impl' ? 'Propostas implantadas em ' : 'Propostas emitidas em ') + mes;
     else t = (state.filters.status==='Implantado' ? 'Propostas implantadas em ' : 'Propostas emitidas em ') + mes;
     els.listTitle.textContent = t;
