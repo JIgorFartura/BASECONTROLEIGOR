@@ -520,7 +520,7 @@
   let state = {
     vendas: [],
     filters: {search:'', porte:'', operadora:'', corretor:'', status:''},
-    sort: {col:'dataEmissao', dir:'desc'},
+    sort: {col:'createdAt', dir:'desc'},
     modal: {mode:'novo', editId:null},
     confirmDeleteId: null,
     year: new Date().getFullYear(),
@@ -785,12 +785,12 @@
     const {col,dir} = state.sort;
     list.sort((a,b)=>{
       let av=a[col], bv=b[col];
-      if(col==='valor' || col==='vidas'){ av=Number(av)||0; bv=Number(bv)||0; }
+      if(col==='valor' || col==='vidas' || col==='createdAt'){ av=Number(av)||0; bv=Number(bv)||0; }
       else if(col==='dataEmissao'){ av=new Date(av).getTime(); bv=new Date(bv).getTime(); }
       else { av=(av||'').toString().toLowerCase(); bv=(bv||'').toString().toLowerCase(); }
       if(av<bv) return dir==='asc'?-1:1;
       if(av>bv) return dir==='asc'?1:-1;
-      return 0;
+      return (Number(b.createdAt)||0)-(Number(a.createdAt)||0);
     });
     return list;
   }
@@ -900,7 +900,7 @@
     listTitle:$('listTitle'), listSum:$('listSum'), chkTodos:$('chkTodos'), goReg:$('goReg'),
     regForm:$('regForm'), regNome:$('regNome'), regMsg:$('regMsg'), regList:$('regList'), regImport:$('regImport'), regWarn:$('regWarn'),
   });
-  Object.assign(state, {page:'painel', tab:'resumo', base:'impl', sort:'valor', rporte:'', selC:'', selO:'', allMonths:false, corretores:[], metas:{}, hasAux:true});
+  Object.assign(state, {page:'painel', tab:'resumo', base:'impl', rsort:'valor', rporte:'', selC:'', selO:'', allMonths:false, corretores:[], metas:{}, hasAux:true});
 
   const num = n => (n||0).toLocaleString('pt-BR');
   const ptCmp = (a,b) => a.localeCompare(b,'pt-BR');
@@ -1092,12 +1092,12 @@
       a.valor += v.valor; a.vidas += (Number(v.vidas)||0); a.qtd++;
       map.set(v[key], a);
     });
-    const s = state.sort, o = s==='valor' ? 'vidas' : 'valor';
+    const s = state.rsort, o = s==='valor' ? 'vidas' : 'valor';
     return [...map.values()].sort((a,b)=>b[s]-a[s] || b[o]-a[o] || ptCmp(a.name,b.name));
   }
   function rankHTML(rows, selected, kind){
     if(!rows.length) return `<div class="rk-empty">Nenhuma venda neste recorte.</div>`;
-    const s = state.sort, max = Math.max(1, rows[0][s]);
+    const s = state.rsort, max = Math.max(1, rows[0][s]);
     return `<ol class="rank-list">` + rows.map((r,i)=>{
       const main = s==='valor' ? fmtCurrency(r.valor) : num(r.vidas)+(r.vidas===1?' vida':' vidas');
       const side = s==='valor' ? num(r.vidas)+(r.vidas===1?' vida':' vidas') : fmtCurrency(r.valor);
@@ -1128,7 +1128,7 @@
       <div class="controls">
         <div class="ctl">Base ${seg('base',[['impl','Implantado'],['emit','Emitido']])}</div>
         <div class="ctl">Porte ${seg('rporte',[['','Todos'], ...PORTE_LIST.map(p=>[p.key,p.key])])}</div>
-        <div class="ctl">Ordenar por ${seg('sort',[['valor','Valor'],['vidas','Vidas']])}</div>
+        <div class="ctl">Ordenar por ${seg('rsort',[['valor','Valor'],['vidas','Vidas']])}</div>
         ${chips}
       </div>
       <div class="rank-grid">
@@ -1215,7 +1215,7 @@
       if(sg){
         const ctl = sg.parentElement.dataset.ctl;
         state[ctl] = sg.dataset.v;
-        if(ctl!=='sort') state.selC = state.selO = '';
+        if(ctl!=='rsort') state.selC = state.selO = '';
         return render();
       }
       const clr = e.target.closest('[data-clear]');
@@ -1420,7 +1420,7 @@
     els.btnConfirmReset.addEventListener('click', async ()=>{
       state.vendas = [];
       state.filters = {search:'', porte:'', operadora:'', corretor:'', status:''};
-      state.sort = {col:'dataEmissao', dir:'desc'};
+      state.sort = {col:'createdAt', dir:'desc'};
       state.confirmDeleteId = null;
       els.searchInput.value = '';
       els.resetOverlay.classList.remove('open');
