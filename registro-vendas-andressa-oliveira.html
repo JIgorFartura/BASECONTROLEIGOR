@@ -253,6 +253,108 @@
   .link-btn{background:none; border:none; padding:0; color:var(--accent); font-size:11.5px; cursor:pointer; text-decoration:underline; text-underline-offset:3px; text-align:left; font-family:var(--font-body);}
   .field .hint2{font-size:11.5px; color:var(--text-faint);}
   .toast{max-width:300px;}
+
+  /* ===== comparar períodos ===== */
+  :root{--up:#4ADE80; --down:#FF6B6B; --cmp-b:#C9BEC3; --scheme:dark;}
+  .cmp-ctrl h2{margin:0 0 4px;}
+  .cmp-ctrl .hint{margin:0 0 16px;}
+  .cmp-rows{display:flex; flex-direction:column; gap:12px;}
+  .cmp-row{display:flex; flex-wrap:wrap; align-items:center; gap:10px 14px;}
+  .cmp-lbl{width:118px; flex:none; display:flex; align-items:center; gap:8px; font-size:13px; font-weight:700;}
+  .cmp-key{display:inline-block; width:16px; height:3px; border-radius:2px; flex:none; vertical-align:middle;}
+  .cmp-key.a{background:var(--accent);} .cmp-key.b{background:var(--cmp-b);}
+  .cmp-dates{display:flex; gap:8px; flex-wrap:wrap;}
+  .cmp-date{display:inline-flex; align-items:center; gap:6px; font-size:12px; color:var(--text-muted);}
+  .cmp-date input{background:var(--surface-2); border:1px solid var(--border); color:var(--text); padding:7px 10px; border-radius:var(--radius-sm); font-size:13.5px; font-family:var(--font-body); color-scheme:var(--scheme); min-width:0;}
+  .cmp-date input:focus{border-color:var(--accent); outline:none;}
+  .cmp-date input[aria-invalid="true"]{border-color:var(--coral);}
+  .cmp-erro{margin:10px 0 0; font-size:12.5px; color:var(--coral);}
+  .cmp-erro:empty{display:none;}
+  .cmp-filtros{margin:16px 0 0; padding-top:14px; border-top:1px solid var(--border);}
+  .cmp-sum{display:flex; flex-wrap:wrap; align-items:center; gap:6px 8px; font-size:13px; color:var(--text-muted); margin:4px 0 14px;}
+  .cmp-sum b{color:var(--text);}
+  .cmp-sum .cmp-key{margin-left:6px;}
+  .cmp-sum .cmp-key:first-child{margin-left:0;}
+  .cmp-warn{margin:-4px 0 14px; font-size:12.5px; color:var(--gold);}
+  .cmp-cards{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px;}
+  @media(max-width:760px){.cmp-cards{grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px;}}
+  .cmp-card{text-align:left; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:16px 18px; cursor:pointer; color:var(--text); font-family:var(--font-body); min-width:0; transition:border-color .15s ease, background .15s ease;}
+  .cmp-card:hover{border-color:var(--accent);}
+  .cmp-card[aria-pressed="true"]{border-color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent); background:color-mix(in srgb, var(--accent) 7%, var(--surface));}
+  .cmp-card .label{font-size:12.5px; color:var(--text-muted); margin-bottom:8px;}
+  .cmp-card .value{font-family:var(--font-display); font-size:23px; font-weight:600; letter-spacing:-0.01em; white-space:nowrap;}
+  .cmp-dl{display:flex; flex-wrap:wrap; align-items:center; gap:4px 8px; margin-top:9px;}
+  .cmp-delta{display:inline-block; padding:3px 9px; border-radius:100px; font-size:12px; font-weight:700; white-space:nowrap; background:color-mix(in srgb, currentColor 13%, transparent);}
+  .cmp-delta.up{color:var(--up);} .cmp-delta.down{color:var(--down);} .cmp-delta.eq{color:var(--text-muted);}
+  .cmp-delta.nulo{background:none; padding:3px 0; font-weight:600; white-space:normal;}
+  .cmp-abs{font-size:12.5px; font-weight:700; color:var(--text-muted); white-space:nowrap;}
+  .cmp-prev{display:flex; align-items:center; flex-wrap:wrap; gap:4px 7px; margin-top:9px; font-size:12px; color:var(--text-muted);}
+  .cmp-prev b{color:var(--text); font-weight:600;}
+  .cmp-tip{font-size:12px; color:var(--text-muted); margin:10px 0 18px;}
+  .cmp-head{display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px 20px; margin-bottom:12px;}
+  .cmp-head h2, .cmp-tbl h2{margin:0 0 2px;}
+  .cmp-head .hint{margin:0;}
+  .cmp-legend{display:flex; flex-wrap:wrap; gap:6px 18px; font-size:12.5px; color:var(--text-muted);}
+  .cmp-legend > span{display:inline-flex; align-items:center; gap:7px;}
+  .cmp-legend b{color:var(--text);}
+  .cmp-chart{position:relative; border-radius:6px;}
+  .cmp-chart:focus{outline:none;}
+  .cmp-chart:focus-visible{outline:2px solid var(--accent); outline-offset:4px;}
+  .cmp-chart svg{display:block; overflow:visible; touch-action:pan-y;}
+  .cmp-chart text{font-family:var(--font-body); font-size:11px; fill:var(--text-muted);}
+  .cmp-chart text.ce{font-size:11.5px; font-weight:700; fill:var(--text);}
+  .cmp-chart .cg{stroke:var(--border); stroke-width:1;}
+  .cmp-chart .la, .cmp-chart .lb{fill:none; stroke-width:2; stroke-linejoin:round; stroke-linecap:round;}
+  .cmp-chart .la{stroke:var(--accent);} .cmp-chart .lb{stroke:var(--cmp-b);}
+  .cmp-chart .ca{fill:var(--accent); opacity:.1;}
+  .cmp-chart circle{stroke:var(--surface); stroke-width:2;}
+  .cmp-chart circle.pa{fill:var(--accent);} .cmp-chart circle.pb{fill:var(--cmp-b);}
+  .cmp-chart .cross{stroke:var(--text-faint); stroke-width:1;}
+  .cmp-tt{position:absolute; top:0; left:0; pointer-events:none; background:var(--surface-2); border:1px solid var(--border); border-radius:10px; padding:9px 12px; font-size:12px; color:var(--text-muted); box-shadow:0 10px 24px rgba(0,0,0,.22); white-space:nowrap; z-index:5;}
+  .cmp-tt .tt-h{font-weight:700; color:var(--text); margin-bottom:5px;}
+  .cmp-tt .tt-r{display:flex; align-items:center; gap:8px; margin-top:4px;}
+  .cmp-tt .tt-r b{color:var(--text); font-size:13px;}
+  .cmp-days{margin-top:14px;}
+  .cmp-days summary{cursor:pointer; font-size:12.5px; font-weight:600; color:var(--text-muted);}
+  .cmp-days summary:hover{color:var(--text);}
+  .cmp-days .table-wrap{margin-top:10px; max-height:340px;}
+  .cmp-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px; align-items:start;}
+  .cmp-grid.one{grid-template-columns:1fr; margin-bottom:14px;}
+  @media(max-width:900px){.cmp-grid{grid-template-columns:1fr;}}
+  .cmp-grid .panel{margin-bottom:0;}
+  .cmp-tbl{min-width:0; padding:18px 18px 10px;}
+  .cmp-tbl-wrap{overflow:auto; max-height:470px;}
+  table.cmp-t{min-width:0; width:100%; font-size:13px;}
+  table.cmp-t th{position:sticky; top:0; z-index:1; background:var(--surface); padding:9px 8px; font-size:11.5px; text-align:right; color:var(--text-muted); border-bottom:1px solid var(--border);}
+  table.cmp-t th:first-child, table.cmp-t td:first-child{text-align:left; padding-left:4px;}
+  table.cmp-t th.sorted{color:var(--accent);}
+  table.cmp-t th .cmp-key{margin-right:6px;}
+  table.cmp-t td{padding:9px 8px; text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums;}
+  table.cmp-t td:first-child{white-space:normal; font-weight:600; min-width:110px;}
+  table.cmp-t tbody tr[data-k]{cursor:pointer;}
+  table.cmp-t tbody tr.sel{background:color-mix(in srgb, var(--accent) 12%, transparent);}
+  table.cmp-t tbody tr:focus-visible{outline:2px solid var(--accent); outline-offset:-2px;}
+  table.cmp-t tfoot td{font-weight:700; border-top:1px solid var(--border);}
+  table.cmp-t .dl{font-weight:700;}
+  table.cmp-t .dl.up{color:var(--up);} table.cmp-t .dl.down{color:var(--down);} table.cmp-t .dl.eq{color:var(--text-muted); font-weight:500;}
+  table.cmp-t .pc{display:block; font-size:11px; font-weight:600; opacity:.9;}
+  table.cmp-t.dias th{cursor:default;}
+  table.cmp-t.dias td:first-child{min-width:0; font-weight:500; color:var(--text-muted);}
+  .cmp-dot{display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:8px; vertical-align:1px;}
+  .cmp-mb{display:none;}
+  @media(max-width:600px){
+    .cmp-lbl{width:100%;}
+    .cmp-dates{display:grid; grid-template-columns:1fr 1fr; width:100%;}
+    .cmp-date{flex-direction:column; align-items:stretch; gap:4px;}
+    .cmp-date input{width:100%;}
+    .cmp-card{padding:14px;}
+    .cmp-card .value{font-size:19px;}
+    table.cmp-t{font-size:12.5px;}
+    table.cmp-t td:first-child{min-width:90px;}
+    table.cmp-t:not(.dias) th:nth-child(3), table.cmp-t:not(.dias) td:nth-child(3){display:none;}
+    table.cmp-t .cmp-mb{display:flex; align-items:center; justify-content:flex-end; gap:5px; margin-top:3px; font-size:11px; font-weight:500; color:var(--text-muted);}
+    table.cmp-t .cmp-mb .cmp-key{width:10px; margin:0;}
+  }
 </style>
 </head>
 <body>
@@ -273,6 +375,7 @@
 
     <nav class="pagenav" id="pageNav" aria-label="Seções">
       <button type="button" data-page="painel" aria-current="page">Painel de vendas</button>
+      <button type="button" data-page="comparar">Comparar períodos</button>
       <button type="button" data-page="corretores">Cadastro de corretores</button>
     </nav>
 
@@ -328,6 +431,44 @@
         <div id="regImport"></div>
       </div>
       <div id="regList"></div>
+    </div>
+
+    <div id="page-comparar" hidden>
+      <div class="panel cmp-ctrl">
+        <h2>Comparar períodos</h2>
+        <p class="hint">Escolha o período e com o que comparar. A entrada conta pela data de emissão; a implantação, pela data em que a venda foi implantada.</p>
+        <div class="cmp-rows">
+          <div class="cmp-row">
+            <div class="cmp-lbl"><span class="cmp-key a"></span>Período</div>
+            <div class="cmp-dates">
+              <label class="cmp-date">De <input type="date" id="cmpAIni" required></label>
+              <label class="cmp-date">Até <input type="date" id="cmpAFim" required></label>
+            </div>
+            <div class="seg" id="cmpAtalhos" role="group" aria-label="Atalhos de período">
+              <button type="button" data-atalho="mes">Este mês até hoje</button>
+              <button type="button" data-atalho="mesPassado">Mês passado</button>
+              <button type="button" data-atalho="7d">Últimos 7 dias</button>
+              <button type="button" data-atalho="ano">Este ano até hoje</button>
+            </div>
+          </div>
+          <div class="cmp-row">
+            <div class="cmp-lbl"><span class="cmp-key b"></span>Comparar com</div>
+            <div class="cmp-dates">
+              <label class="cmp-date">De <input type="date" id="cmpBIni" required></label>
+              <label class="cmp-date">Até <input type="date" id="cmpBFim" required></label>
+            </div>
+            <div class="seg" id="cmpRegras" role="group" aria-label="Comparar com">
+              <button type="button" data-regra="mes" title="Os mesmos dias, um mês antes">Mês anterior</button>
+              <button type="button" data-regra="ano" title="Os mesmos dias, um ano antes">Ano anterior</button>
+              <button type="button" data-regra="anterior">Período anterior</button>
+              <button type="button" data-regra="livre" title="Escolha as duas datas à vontade">Datas livres</button>
+            </div>
+          </div>
+        </div>
+        <p class="cmp-erro" id="cmpErro" role="alert"></p>
+        <div class="controls cmp-filtros" id="cmpFiltros"></div>
+      </div>
+      <div id="cmpBody"></div>
     </div>
 
     <p class="footer-note">
@@ -655,6 +796,7 @@
     renderFilters();
     renderTable();
     if(state.page==='corretores') renderCorretoresPage();
+    if(state.page==='comparar') renderComparar();
     updateSync();
   }
 
@@ -1047,8 +1189,10 @@
     state.page = p;
     els.pagePainel.hidden = p!=='painel';
     els.pageCorretores.hidden = p!=='corretores';
+    els.pageComparar.hidden = p!=='comparar';
     document.querySelectorAll('#pageNav button').forEach(b=>{ if(b.dataset.page===p) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current'); });
     if(p==='corretores') renderCorretoresPage();
+    if(p==='comparar') renderComparar();
   }
 
   // --- listagem do mês (coerente com o que o painel mostra acima) ---
@@ -1279,9 +1423,426 @@
     });
   }
 
+  // ---------- comparar períodos ----------
+  // Compara dois intervalos de datas quaisquer, com as mesmas regras do painel:
+  // a entrada conta pela data de emissão; a implantação, pela data em que a venda foi implantada.
+  const CMP_MASTER = typeof SOURCES !== 'undefined';
+  const DIA_MS = 86400000;
+  const pad2 = n => String(n).padStart(2,'0');
+  function utcDe(iso){ const p = iso.split('-').map(Number); return Date.UTC(p[0], p[1]-1, p[2]); }
+  function isoDeUtc(t){ const d = new Date(t); return d.getUTCFullYear()+'-'+pad2(d.getUTCMonth()+1)+'-'+pad2(d.getUTCDate()); }
+  function addDias(iso, n){ return isoDeUtc(utcDe(iso) + n*DIA_MS); }
+  function diasEntre(a, b){ return Math.round((utcDe(b) - utcDe(a)) / DIA_MS); }
+  function ultimoDia(y, m1){ return new Date(Date.UTC(y, m1, 0)).getUTCDate(); }
+  // anda k meses; com fimDoMes, o último dia de um mês vira o último dia do outro (30/09 → 31/08)
+  function addMeses(iso, k, fimDoMes){
+    const p = iso.split('-').map(Number);
+    const t = new Date(Date.UTC(p[0], p[1]-1+k, 1));
+    const y = t.getUTCFullYear(), m1 = t.getUTCMonth()+1, ult = ultimoDia(y, m1);
+    const d = (fimDoMes && p[2]===ultimoDia(p[0], p[1])) ? ult : Math.min(p[2], ult);
+    return y+'-'+pad2(m1)+'-'+pad2(d);
+  }
+  function isoOk(s){ return /^\d{4}-\d{2}-\d{2}$/.test(s||'') && isoDeUtc(utcDe(s))===s; }
+
+  function cmpAtalho(k){
+    const hoje = todayISO(), mes1 = hoje.slice(0,8)+'01';
+    if(k==='mesPassado') return {aIni:addMeses(mes1, -1, false), aFim:addDias(mes1, -1), regra:'mes'};
+    if(k==='7d') return {aIni:addDias(hoje, -6), aFim:hoje, regra:'anterior'};
+    if(k==='ano') return {aIni:hoje.slice(0,5)+'01-01', aFim:hoje, regra:'ano'};
+    return {aIni:mes1, aFim:hoje, regra:'mes'};
+  }
+  function cmpCalcB(aIni, aFim, regra){
+    if(regra==='mes' || regra==='ano'){
+      const k = regra==='ano' ? -12 : -1;
+      if(aIni===aFim){ const d = addMeses(aIni, k, false); return {bIni:d, bFim:d}; }
+      const bIni = addMeses(aIni, k, false), bFim = addMeses(aFim, k, true);
+      return {bIni: bIni > bFim ? bFim : bIni, bFim};
+    }
+    // período anterior: o mesmo número de dias, logo antes
+    const n = diasEntre(aIni, aFim) + 1, bFim = addDias(aIni, -1);
+    return {bIni:addDias(bFim, 1-n), bFim};
+  }
+  state.cmp = (()=>{ const a = cmpAtalho('mes'); return Object.assign({metric:'entrada', porte:'', equipe:'', selC:'', selO:'', sort:{}, dias:false}, a, cmpCalcB(a.aIni, a.aFim, a.regra)); })();
+  Object.assign(els, {
+    pageComparar:$('page-comparar'), cmpBody:$('cmpBody'), cmpFiltros:$('cmpFiltros'), cmpErro:$('cmpErro'),
+    cmpAIni:$('cmpAIni'), cmpAFim:$('cmpAFim'), cmpBIni:$('cmpBIni'), cmpBFim:$('cmpBFim'),
+    cmpAtalhos:$('cmpAtalhos'), cmpRegras:$('cmpRegras'),
+  });
+
+  const CMP_METRICAS = [
+    {k:'entrada', label:'Valor de entrada', base:'emit', money:true},
+    {k:'impl', label:'Valor implantado', base:'impl', money:true},
+    {k:'qEmit', label:'Propostas emitidas', base:'emit'},
+    {k:'qImpl', label:'Vendas implantadas', base:'impl'},
+    {k:'vidas', label:'Vidas implantadas', base:'impl'},
+    {k:'ticket', label:'Ticket médio implantado', base:'impl', money:true, media:true},
+  ];
+  function cmpMetrica(){ return CMP_METRICAS.find(m=>m.k===state.cmp.metric) || CMP_METRICAS[0]; }
+  function cmpDe(m, V, Q, VI){
+    if(m.k==='entrada' || m.k==='impl') return V;
+    if(m.k==='vidas') return VI;
+    if(m.media) return Q ? V/Q : null;
+    return Q;
+  }
+  function cmpValor(m, l){
+    let V = 0, VI = 0;
+    l.forEach(v=>{ V += Number(v.valor)||0; VI += Number(v.vidas)||0; });
+    return cmpDe(m, V, l.length, VI);
+  }
+  const cmpLista = (L, m) => m.base==='impl' ? L.impl : L.emit;
+  const fmtMoeda0 = n => (n||0).toLocaleString('pt-BR', {style:'currency', currency:'BRL', minimumFractionDigits:0, maximumFractionDigits:0});
+  function cmpFmt(m, n){ return n==null ? '—' : (m.money ? fmtMoeda0(n) : num(Math.round(n))); }
+  function cmpPct(r){ const v = r*100; return (v>=10 ? Math.round(v).toLocaleString('pt-BR') : v.toFixed(1).replace('.', ',')) + '%'; }
+  function cmpDelta(m, a, b){
+    if(a==null && b==null) return {cls:'eq', txt:'sem movimento', curto:'sem movimento'};
+    if(a==null || b==null) return {cls:'eq', txt:'sem base para comparar', curto:'—', nulo:true};
+    if(!a && !b) return {cls:'eq', txt:'sem movimento', curto:'sem movimento'};
+    const d = a - b;
+    if(Math.abs(d) < 0.005) return {cls:'eq', txt:'= sem variação', curto:'sem variação'};
+    const up = d > 0;
+    return {cls:up ? 'up' : 'down', seta:up ? '▲' : '▼', sinal:up ? '+' : '−', abs:cmpFmt(m, Math.abs(d)), pct:b > 0 ? cmpPct(Math.abs(d)/b) : 'novo'};
+  }
+  function cmpDeltaCard(d){
+    return d.seta
+      ? `<div class="cmp-dl"><span class="cmp-delta ${d.cls}">${d.seta} ${d.pct}</span><span class="cmp-abs">${d.sinal}${d.abs}</span></div>`
+      : `<div class="cmp-dl"><span class="cmp-delta eq${d.nulo ? ' nulo' : ''}">${d.txt}</span></div>`;
+  }
+  function cmpData(iso, ano){ const p = iso.split('-'); return p[2]+'/'+p[1]+(ano==='curto' ? '/'+p[0].slice(2) : (ano ? '/'+p[0] : '')); }
+  function cmpRot(ini, fim, ano){ return ini===fim ? cmpData(ini, ano) : cmpData(ini, ano)+' a '+cmpData(fim, ano); }
+  function cmpNDias(ini, fim){ const n = diasEntre(ini, fim) + 1; return n+(n===1 ? ' dia' : ' dias'); }
+
+  const cmpKC = v => String(v.corretor||'').trim() || '(sem corretor)';
+  const cmpKO = v => String(v.operadora||'').trim() || '(sem operadora)';
+  function cmpPeriodo(ini, fim){
+    const porte = state.cmp.porte, emit = [], impl = [];
+    state.vendas.forEach(v=>{
+      if(porte && v.porte!==porte) return;
+      const e = toISODate(v.dataEmissao), i = dataImpl(v);
+      if(e && e>=ini && e<=fim) emit.push(v);
+      if(i && i>=ini && i<=fim) impl.push(v);
+    });
+    return {emit, impl};
+  }
+  // filtros de clique (equipe, corretor, operadora); cada tabela ignora o próprio filtro
+  function cmpSub(L, pula){
+    const c = state.cmp;
+    const ok = v => (pula==='E' || !c.equipe || v._origem===c.equipe)
+                 && (pula==='C' || !c.selC || cmpKC(v)===c.selC)
+                 && (pula==='O' || !c.selO || cmpKO(v)===c.selO);
+    return {emit:L.emit.filter(ok), impl:L.impl.filter(ok)};
+  }
+  function cmpSerie(m, lista, ini, fim){
+    const n = diasEntre(ini, fim) + 1, porDia = new Map();
+    lista.forEach(v=>{
+      const d = m.base==='impl' ? dataImpl(v) : toISODate(v.dataEmissao);
+      const a = porDia.get(d) || {V:0, Q:0, VI:0};
+      a.V += Number(v.valor)||0; a.Q++; a.VI += Number(v.vidas)||0;
+      porDia.set(d, a);
+    });
+    const out = [];
+    let V = 0, Q = 0, VI = 0, t = utcDe(ini);
+    for(let i=0; i<n; i++, t+=DIA_MS){
+      const iso = isoDeUtc(t), d = porDia.get(iso) || {V:0, Q:0, VI:0};
+      V += d.V; Q += d.Q; VI += d.VI;
+      out.push({iso, acum:cmpDe(m, V, Q, VI), dia:cmpDe(m, d.V, d.Q, d.VI)});
+    }
+    return out;
+  }
+  function cmpGrupos(m, la, lb, kf, semente){
+    const map = new Map();
+    (semente||[]).forEach(k=>map.set(k, {nome:k, A:[], B:[]}));
+    const add = (l, lado) => l.forEach(v=>{ const k = kf(v); let g = map.get(k); if(!g){ g = {nome:k, A:[], B:[]}; map.set(k, g); } g[lado].push(v); });
+    add(la, 'A'); add(lb, 'B');
+    return [...map.values()].map(g=>({nome:g.nome, a:cmpValor(m, g.A), b:cmpValor(m, g.B)}));
+  }
+  function cmpOrdena(rows, s){
+    const dir = s.dir==='asc' ? 1 : -1;
+    const val = r => s.col==='a' ? r.a : (s.col==='b' ? r.b : (r.a==null || r.b==null ? null : r.a - r.b));
+    return rows.sort((x, y)=>{
+      if(s.col==='nome') return dir * ptCmp(x.nome, y.nome);
+      const vx = val(x), vy = val(y);
+      if(vx==null || vy==null){ if(vx!=null) return -1; if(vy!=null) return 1; }
+      else if(vx!==vy) return (vx - vy) * dir;
+      return ((y.a||0) - (x.a||0)) || ((y.b||0) - (x.b||0)) || ptCmp(x.nome, y.nome);
+    });
+  }
+  function cmpTabela(t, titulo, dica, colNome, rows, tot, m, sel, rotA, rotB, corDe){
+    const s = state.cmp.sort[t] || {col:'a', dir:'desc'};
+    cmpOrdena(rows, s);
+    const th = (col, txt, extra) => { const on = s.col===col; return `<th scope="col" data-t="${t}" data-sort="${col}" class="${on ? 'sorted' : ''}" aria-sort="${on ? (s.dir==='asc' ? 'ascending' : 'descending') : 'none'}">${txt}${on ? (s.dir==='asc' ? ' ▲' : ' ▼') : ''}${extra||''}</th>`; };
+    // no celular a coluna do período comparado some e o valor dele aparece embaixo do principal
+    const mb = v => `<span class="cmp-mb"><span class="cmp-key b"></span>${v}</span>`;
+    const cels = r => { const d = cmpDelta(m, r.a, r.b); return `<td>${cmpFmt(m, r.a)}${mb(cmpFmt(m, r.b))}</td><td>${cmpFmt(m, r.b)}</td><td class="dl ${d.cls}">${d.seta ? d.seta+' '+d.abs+'<span class="pc">'+(d.pct==='novo' ? 'novo' : d.sinal+d.pct)+'</span>' : d.curto}</td>`; };
+    const corpo = rows.length
+      ? rows.map(r=>`<tr data-t="${t}" data-k="${escapeHtml(r.nome)}" tabindex="0" class="${sel===r.nome ? 'sel' : ''}"><td>${corDe ? `<span class="cmp-dot" style="background:${corDe(r.nome)}"></span>` : ''}${escapeHtml(r.nome)}</td>${cels(r)}</tr>`).join('')
+      : `<tr><td colspan="4"><div class="rk-empty">Nenhuma venda nos dois períodos.</div></td></tr>`;
+    return `<div class="panel cmp-tbl"><h2>${titulo}</h2><p class="hint">${escapeHtml(dica)}</p>
+      <div class="cmp-tbl-wrap" data-scroll="${t}"><table class="cmp-t">
+        <thead><tr>${th('nome', colNome)}${th('a', '<span class="cmp-key a"></span>'+escapeHtml(rotA), mb(escapeHtml(rotB)))}${th('b', '<span class="cmp-key b"></span>'+escapeHtml(rotB))}${th('d', 'Variação')}</tr></thead>
+        <tbody>${corpo}</tbody>
+        ${rows.length > 1 ? `<tfoot><tr><td>Total</td>${cels(tot)}</tr></tfoot>` : ''}
+      </table></div></div>`;
+  }
+
+  // --- gráfico: soma acumulada dia a dia dos dois períodos, alinhados pelo dia do período ---
+  let cmpGeo = null, cmpUlt = null;
+  function cmpTicks(max, inteiro){
+    if(!(max > 0)) return [0, 1];
+    const raw = max/4, p = Math.pow(10, Math.floor(Math.log10(raw))), f = raw/p;
+    let step = (f<=1 ? 1 : f<=2 ? 2 : f<=2.5 ? 2.5 : f<=5 ? 5 : 10) * p;
+    if(inteiro){ step = Math.max(1, step); if(step===2.5) step = 2; }
+    const n = Math.max(1, Math.ceil(max/step - 1e-9)), out = [];
+    for(let i=0; i<=n; i++) out.push(Math.round(i*step*1e6)/1e6);
+    return out;
+  }
+  function cmpGrafico(m, sA, sB, anoC){
+    const box = document.getElementById('cmpChart'); if(!box) return;
+    const alvo = box.querySelector('.cmp-svg');
+    const n = Math.max(sA.length, sB.length);
+    const vals = sA.concat(sB).map(p=>p.acum).filter(v=>v!=null);
+    const max = vals.length ? Math.max(...vals) : 0;
+    cmpGeo = null;
+    box.querySelector('.cmp-tt').hidden = true;
+    if(!(max > 0)){ alvo.innerHTML = `<div class="rk-empty">Nenhum valor nos dois períodos para ${escapeHtml(m.label.toLowerCase())}.</div>`; return; }
+    const W = Math.max(260, Math.floor(box.clientWidth || 640)), estreito = W < 520;
+    const H = estreito ? 210 : 250, pL = estreito ? 50 : 64, pR = estreito ? 12 : 74, pT = 10, pB = 28;
+    const pw = W - pL - pR, ph = H - pT - pB;
+    const ticks = cmpTicks(max, !m.money), topo = ticks[ticks.length-1];
+    const X = i => pL + (n<=1 ? pw/2 : i*pw/(n-1));
+    const Y = v => pT + ph*(1 - v/topo);
+    const fy = v => m.money ? fmtCompact(v) : num(v);
+    const f1 = v => v.toFixed(1);
+    let g = '';
+    ticks.forEach(t=>{ const y = f1(Y(t)); g += `<line class="cg" x1="${pL}" x2="${W-pR}" y1="${y}" y2="${y}"/><text x="${pL-8}" y="${f1(Y(t)+4)}" text-anchor="end">${escapeHtml(fy(t))}</text>`; });
+    const nt = n<=1 ? 1 : Math.max(2, Math.min(n, Math.floor(pw/74)));
+    const idx = nt===1 ? [0] : [...new Set(Array.from({length:nt}, (_, k)=>Math.round(k*(n-1)/(nt-1))))];
+    const viraAno = sA.length > 0 && sA[0].iso.slice(0,4) !== sA[sA.length-1].iso.slice(0,4);
+    idx.forEach(i=>{
+      const lbl = i < sA.length ? cmpData(sA[i].iso, viraAno ? 'curto' : '') : 'dia '+(i+1);
+      const anc = n<=1 ? 'middle' : (i===0 ? 'start' : (i===n-1 ? 'end' : 'middle'));
+      g += `<text x="${f1(X(i))}" y="${H-8}" text-anchor="${anc}">${lbl}</text>`;
+    });
+    const linha = s => { let d = '', on = false; s.forEach((p, i)=>{ if(p.acum==null){ on = false; return; } d += (on ? 'L' : 'M') + f1(X(i)) + ' ' + f1(Y(p.acum)); on = true; }); return d; };
+    const ultimo = s => { for(let i=s.length-1; i>=0; i--) if(s[i].acum!=null) return i; return -1; };
+    const iA = ultimo(sA), iB = ultimo(sB), dA = linha(sA), dB = linha(sB);
+    if(!m.media && iA>=0) g += `<path class="ca" d="${dA}L${f1(X(iA))} ${f1(Y(0))}L${f1(X(0))} ${f1(Y(0))}Z"/>`;
+    if(dB) g += `<path class="lb" d="${dB}"/>`;
+    if(dA) g += `<path class="la" d="${dA}"/>`;
+    if(iB>=0) g += `<circle class="pb" cx="${f1(X(iB))}" cy="${f1(Y(sB[iB].acum))}" r="4"/>`;
+    if(iA>=0) g += `<circle class="pa" cx="${f1(X(iA))}" cy="${f1(Y(sA[iA].acum))}" r="4"/>`;
+    if(!estreito && iA>=0 && iB>=0){
+      const ya = Y(sA[iA].acum), yb = Y(sB[iB].acum);
+      const perto = Math.abs(X(iA) - X(iB)) < 70 && Math.abs(ya - yb) < 16;
+      if(!perto) g += `<text class="ce" x="${f1(X(iA)+9)}" y="${f1(ya+4)}">${escapeHtml(fy(sA[iA].acum))}</text><text class="ce" x="${f1(X(iB)+9)}" y="${f1(yb+4)}">${escapeHtml(fy(sB[iB].acum))}</text>`;
+    }
+    g += `<line class="cross" x1="0" x2="0" y1="${pT}" y2="${H-pB}" style="display:none"/><circle class="hv pb" r="5" style="display:none"/><circle class="hv pa" r="5" style="display:none"/>`;
+    alvo.innerHTML = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" aria-hidden="true" focusable="false">${g}</svg>`;
+    cmpGeo = {m, sA, sB, n, X, Y, W, pL, pw, pT, anoC, idx:null};
+  }
+  function cmpMostra(i){
+    const g = cmpGeo, box = document.getElementById('cmpChart');
+    if(!g || !box) return;
+    const svg = box.querySelector('svg'), tt = box.querySelector('.cmp-tt');
+    if(!svg || !tt) return;
+    const cross = svg.querySelector('.cross'), ha = svg.querySelector('.hv.pa'), hb = svg.querySelector('.hv.pb');
+    if(i==null){ tt.hidden = true; [cross, ha, hb].forEach(el=>{ el.style.display = 'none'; }); return; }
+    i = Math.max(0, Math.min(g.n-1, i)); g.idx = i;
+    const xx = g.X(i), x = xx.toFixed(1);
+    cross.setAttribute('x1', x); cross.setAttribute('x2', x); cross.style.display = '';
+    const marca = (el, s) => { const p = s[i]; if(p && p.acum!=null){ el.setAttribute('cx', x); el.setAttribute('cy', g.Y(p.acum).toFixed(1)); el.style.display = ''; } else el.style.display = 'none'; };
+    marca(ha, g.sA); marca(hb, g.sB);
+    const lin = (cls, s) => { const p = s[i]; return p
+      ? `<div class="tt-r"><span class="cmp-key ${cls}"></span><b>${escapeHtml(cmpFmt(g.m, p.acum))}</b><span>até ${cmpData(p.iso, g.anoC)}${g.m.media ? '' : ' · no dia '+escapeHtml(cmpFmt(g.m, p.dia))}</span></div>`
+      : `<div class="tt-r"><span class="cmp-key ${cls}"></span><span>período já terminou</span></div>`; };
+    tt.innerHTML = `<div class="tt-h">Dia ${i+1} de ${g.n}</div>${lin('a', g.sA)}${lin('b', g.sB)}`;
+    tt.hidden = false;
+    const w = tt.offsetWidth;
+    tt.style.left = Math.max(0, xx + 14 + w > g.W ? xx - 14 - w : xx + 14) + 'px';
+    tt.style.top = g.pT + 'px';
+  }
+
+  // --- página ---
+  function cmpSyncInputs(){
+    const c = state.cmp;
+    [['cmpAIni','aIni'], ['cmpAFim','aFim'], ['cmpBIni','bIni'], ['cmpBFim','bFim']].forEach(([id, k])=>{
+      const el = els[id];
+      if(el && el!==document.activeElement){ if(el.value!==c[k]) el.value = c[k]; el.removeAttribute('aria-invalid'); }
+    });
+    if(!document.querySelector('#page-comparar [aria-invalid="true"]')) els.cmpErro.textContent = '';
+    els.cmpAtalhos.querySelectorAll('button').forEach(b=>{ const a = cmpAtalho(b.dataset.atalho); b.setAttribute('aria-pressed', String(a.aIni===c.aIni && a.aFim===c.aFim)); });
+    els.cmpRegras.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed', String(b.dataset.regra===c.regra)));
+    const ant = els.cmpRegras.querySelector('[data-regra="anterior"]');
+    if(ant) ant.title = 'Os '+cmpNDias(c.aIni, c.aFim)+' logo antes do período';
+  }
+  function cmpFiltrosHTML(){
+    const c = state.cmp;
+    const seg = (ctl, opts) => `<div class="seg" data-cctl="${ctl}">${opts.map(([v, l])=>`<button type="button" data-v="${escapeHtml(v)}" aria-pressed="${c[ctl]===v}">${escapeHtml(l)}</button>`).join('')}</div>`;
+    const chip = (k, rot, val) => val ? `<span class="chip">${rot}: ${escapeHtml(val)}<button type="button" data-cclear="${k}" aria-label="Limpar filtro de ${rot.toLowerCase()}">&times;</button></span>` : '';
+    els.cmpFiltros.innerHTML = (CMP_MASTER ? `<div class="ctl">Equipe ${seg('equipe', [['', 'Todas'], ...SOURCES.map(s=>[s.name, s.name.split(' ')[0]])])}</div>` : '')
+      + `<div class="ctl">Porte ${seg('porte', [['', 'Todos'], ...PORTE_LIST.map(p=>[p.key, p.key])])}</div>`
+      + chip('C', 'Corretor', c.selC) + chip('O', 'Operadora', c.selO);
+  }
+  function renderComparar(){
+    if(!els.cmpBody) return;
+    const c = state.cmp, m = cmpMetrica(), hoje = todayISO();
+    cmpSyncInputs();
+    cmpFiltrosHTML();
+    const anoC = [c.aIni, c.aFim, c.bIni, c.bFim].some(d=>d.slice(0,4)!==hoje.slice(0,4)) ? 'curto' : '';
+    const rotA = cmpRot(c.aIni, c.aFim, anoC), rotB = cmpRot(c.bIni, c.bFim, anoC);
+    const A = cmpPeriodo(c.aIni, c.aFim), B = cmpPeriodo(c.bIni, c.bFim);
+    const tA = cmpSub(A, ''), tB = cmpSub(B, '');
+    const avisos = [];
+    if(c.aIni <= c.bFim && c.bIni <= c.aFim) avisos.push('os dois períodos se sobrepõem');
+    if(c.aFim > hoje || c.bFim > hoje) avisos.push('há dias depois de hoje, que ainda não têm vendas');
+    if(Math.abs(diasEntre(c.aIni, c.aFim) - diasEntre(c.bIni, c.bFim)) > 3) avisos.push('os períodos têm tamanhos bem diferentes');
+    const cards = CMP_METRICAS.map(mm=>{
+      const a = cmpValor(mm, cmpLista(tA, mm)), b = cmpValor(mm, cmpLista(tB, mm)), d = cmpDelta(mm, a, b);
+      return `<button type="button" class="cmp-card" data-metric="${mm.k}" aria-pressed="${mm.k===m.k}">
+          <div class="label">${mm.label}</div>
+          <div class="value">${cmpFmt(mm, a)}</div>
+          ${cmpDeltaCard(d)}
+          <div class="cmp-prev"><span class="cmp-key b"></span><span>${escapeHtml(rotB)}:</span><b>${cmpFmt(mm, b)}</b></div>
+        </button>`;
+    }).join('');
+    const lA = cmpLista(tA, m), lB = cmpLista(tB, m);
+    const sA = cmpSerie(m, lA, c.aIni, c.aFim), sB = cmpSerie(m, lB, c.bIni, c.bFim);
+    const totA = cmpValor(m, lA), totB = cmpValor(m, lB);
+    const acum = m.media ? 'Média até o dia' : 'Acumulado';
+    let dias = '';
+    for(let i=0; i<Math.max(sA.length, sB.length); i++){
+      const a = sA[i], b = sB[i];
+      dias += `<tr><td>${i+1}</td><td>${a ? cmpData(a.iso, anoC) : '—'}</td><td>${a ? cmpFmt(m, a.dia) : '—'}</td><td>${a ? cmpFmt(m, a.acum) : '—'}</td><td>${b ? cmpData(b.iso, anoC) : '—'}</td><td>${b ? cmpFmt(m, b.dia) : '—'}</td><td>${b ? cmpFmt(m, b.acum) : '—'}</td></tr>`;
+    }
+    const tab = (t, titulo, quem, colNome, kf, semente, corDe) => {
+      const sa = cmpSub(A, t), sb = cmpSub(B, t), la = cmpLista(sa, m), lb = cmpLista(sb, m);
+      const sel = t==='C' ? c.selC : (t==='O' ? c.selO : c.equipe);
+      return cmpTabela(t, titulo, m.label+' · clique '+quem+' para filtrar a página', colNome, cmpGrupos(m, la, lb, kf, semente), {nome:'Total', a:cmpValor(m, la), b:cmpValor(m, lb)}, m, sel, rotA, rotB, corDe);
+    };
+    const corEquipe = nome => { const s = CMP_MASTER && SOURCES.find(x=>x.name===nome); return s ? s.color : 'var(--text-faint)'; };
+    const scrolls = {};
+    els.cmpBody.querySelectorAll('[data-scroll]').forEach(w=>{ scrolls[w.dataset.scroll] = w.scrollTop; });
+    els.cmpBody.innerHTML = `
+      <div class="cmp-sum"><span class="cmp-key a"></span><b>${cmpRot(c.aIni, c.aFim, 'longo')}</b><span>(${cmpNDias(c.aIni, c.aFim)})</span><span>comparado com</span><span class="cmp-key b"></span><b>${cmpRot(c.bIni, c.bFim, 'longo')}</b><span>(${cmpNDias(c.bIni, c.bFim)})</span></div>
+      ${avisos.length ? `<p class="cmp-warn">Atenção: ${avisos.join('; ')}.</p>` : ''}
+      <div class="cmp-cards">${cards}</div>
+      <p class="cmp-tip">Clique num indicador para ver o gráfico e as tabelas dele.</p>
+      <div class="panel">
+        <div class="cmp-head">
+          <div><h2>Ritmo dia a dia · ${m.label}</h2><p class="hint">${m.media ? 'Média acumulada' : 'Soma acumulada'} até cada dia de cada período</p></div>
+          <div class="cmp-legend"><span><span class="cmp-key a"></span>${escapeHtml(rotA)} · <b>${cmpFmt(m, totA)}</b></span><span><span class="cmp-key b"></span>${escapeHtml(rotB)} · <b>${cmpFmt(m, totB)}</b></span></div>
+        </div>
+        <div class="cmp-chart" id="cmpChart" tabindex="0" role="group" aria-label="Gráfico de ${escapeHtml(m.label)}: ${escapeHtml(rotA)}, ${escapeHtml(cmpFmt(m, totA))}; ${escapeHtml(rotB)}, ${escapeHtml(cmpFmt(m, totB))}. Use as setas para ver cada dia.">
+          <div class="cmp-svg"></div><div class="cmp-tt" hidden aria-live="polite"></div>
+        </div>
+        <details class="cmp-days"${c.dias ? ' open' : ''}><summary>Ver os números dia a dia</summary>
+          <div class="table-wrap" data-scroll="D"><table class="cmp-t dias"><thead><tr><th>Dia</th><th><span class="cmp-key a"></span>Data</th><th>No dia</th><th>${acum}</th><th><span class="cmp-key b"></span>Data</th><th>No dia</th><th>${acum}</th></tr></thead><tbody>${dias}</tbody></table></div>
+        </details>
+      </div>
+      ${CMP_MASTER ? `<div class="cmp-grid one">${tab('E', 'Por equipe', 'numa equipe', 'Equipe', v=>v._origem, SOURCES.map(s=>s.name), corEquipe)}</div>` : ''}
+      <div class="cmp-grid">${tab('C', 'Por corretor', 'num corretor', 'Corretor', cmpKC)}${tab('O', 'Por operadora', 'numa operadora', 'Operadora', cmpKO)}</div>`;
+    els.cmpBody.querySelectorAll('[data-scroll]').forEach(w=>{ const s = scrolls[w.dataset.scroll]; if(s) w.scrollTop = s; });
+    cmpUlt = {m, sA, sB, anoC};
+    cmpGrafico(m, sA, sB, anoC);
+  }
+  function cmpSel(t, k){
+    const c = state.cmp;
+    if(t==='C') c.selC = c.selC===k ? '' : k;
+    else if(t==='O') c.selO = c.selO===k ? '' : k;
+    else if(t==='E') c.equipe = c.equipe===k ? '' : k;
+    renderComparar();
+    const tr = els.cmpBody.querySelector(`tr[data-t="${t}"][data-k="${CSS.escape(k)}"]`);
+    if(tr) tr.focus({preventScroll:true});
+  }
+  // lê De/Até; só aceita quando as duas datas estão completas e na ordem certa
+  function cmpLerDatas(lado){
+    const elI = lado==='a' ? els.cmpAIni : els.cmpBIni, elF = lado==='a' ? els.cmpAFim : els.cmpBFim;
+    const ini = elI.value, fim = elF.value, okI = isoOk(ini), okF = isoOk(fim), ordem = okI && okF && ini <= fim;
+    elI.setAttribute('aria-invalid', String(!okI || (okF && !ordem)));
+    elF.setAttribute('aria-invalid', String(!okF || (okI && !ordem)));
+    if(!ordem){ els.cmpErro.textContent = (okI && okF) ? 'A data "De" precisa ser igual ou anterior à data "Até".' : 'Preencha a data completa (dia, mês e ano).'; return false; }
+    state.cmp[lado+'Ini'] = ini; state.cmp[lado+'Fim'] = fim;
+    if(!document.querySelector('#page-comparar [aria-invalid="true"]')) els.cmpErro.textContent = '';
+    return true;
+  }
+  function bindComparar(){
+    if(!els.cmpBody) return;
+    els.cmpAtalhos.addEventListener('click', e=>{
+      const b = e.target.closest('button[data-atalho]'); if(!b) return;
+      const a = cmpAtalho(b.dataset.atalho);
+      Object.assign(state.cmp, a, cmpCalcB(a.aIni, a.aFim, a.regra));
+      renderComparar();
+    });
+    els.cmpRegras.addEventListener('click', e=>{
+      const b = e.target.closest('button[data-regra]'); if(!b) return;
+      const c = state.cmp;
+      c.regra = b.dataset.regra;
+      if(c.regra!=='livre') Object.assign(c, cmpCalcB(c.aIni, c.aFim, c.regra));
+      renderComparar();
+      if(c.regra==='livre') els.cmpBIni.focus();
+    });
+    const aposA = () => { if(!cmpLerDatas('a')) return; const c = state.cmp; if(c.regra!=='livre') Object.assign(c, cmpCalcB(c.aIni, c.aFim, c.regra)); renderComparar(); };
+    const aposB = () => { if(!cmpLerDatas('b')) return; state.cmp.regra = 'livre'; renderComparar(); };
+    els.cmpAIni.addEventListener('change', aposA);
+    els.cmpAFim.addEventListener('change', aposA);
+    els.cmpBIni.addEventListener('change', aposB);
+    els.cmpBFim.addEventListener('change', aposB);
+    els.cmpFiltros.addEventListener('click', e=>{
+      const b = e.target.closest('.seg button');
+      if(b){ state.cmp[b.parentElement.dataset.cctl] = b.dataset.v; renderComparar(); return; }
+      const x = e.target.closest('[data-cclear]');
+      if(x){ if(x.dataset.cclear==='C') state.cmp.selC = ''; else state.cmp.selO = ''; renderComparar(); }
+    });
+    els.cmpBody.addEventListener('click', e=>{
+      const card = e.target.closest('.cmp-card');
+      if(card){ state.cmp.metric = card.dataset.metric; renderComparar(); return; }
+      const th = e.target.closest('th[data-sort]');
+      if(th){
+        const t = th.dataset.t, col = th.dataset.sort, s = state.cmp.sort[t] || {col:'a', dir:'desc'};
+        state.cmp.sort[t] = s.col===col ? {col, dir:s.dir==='asc' ? 'desc' : 'asc'} : {col, dir:col==='nome' ? 'asc' : 'desc'};
+        renderComparar(); return;
+      }
+      const tr = e.target.closest('tr[data-k]');
+      if(tr) cmpSel(tr.dataset.t, tr.dataset.k);
+    });
+    els.cmpBody.addEventListener('keydown', e=>{
+      if(e.target.id==='cmpChart'){
+        if(!cmpGeo) return;
+        let i = cmpGeo.idx==null ? cmpGeo.n-1 : cmpGeo.idx;
+        if(e.key==='ArrowLeft') i--; else if(e.key==='ArrowRight') i++;
+        else if(e.key==='Home') i = 0; else if(e.key==='End') i = cmpGeo.n-1;
+        else if(e.key==='Escape'){ cmpMostra(null); return; }
+        else return;
+        e.preventDefault(); cmpMostra(i); return;
+      }
+      const tr = e.target.closest('tr[data-k]');
+      if(tr && (e.key==='Enter' || e.key===' ')){ e.preventDefault(); cmpSel(tr.dataset.t, tr.dataset.k); }
+    });
+    const aponta = e => {
+      const box = e.target.closest && e.target.closest('#cmpChart'); if(!box || !cmpGeo) return;
+      const svg = box.querySelector('svg'); if(!svg) return;
+      const r = svg.getBoundingClientRect(); if(!r.width) return;
+      const px = (e.clientX - r.left) * (cmpGeo.W / r.width);
+      cmpMostra(cmpGeo.n<=1 ? 0 : Math.round((px - cmpGeo.pL) / (cmpGeo.pw / (cmpGeo.n-1))));
+    };
+    els.cmpBody.addEventListener('pointermove', aponta);
+    els.cmpBody.addEventListener('pointerdown', aponta);
+    els.cmpBody.addEventListener('pointerout', e=>{
+      if(e.pointerType==='touch') return;
+      const box = e.target.closest && e.target.closest('#cmpChart');
+      if(box && !box.contains(e.relatedTarget) && document.activeElement!==box) cmpMostra(null);
+    });
+    document.addEventListener('pointerdown', e=>{ if(state.page==='comparar' && !(e.target.closest && e.target.closest('#cmpChart'))) cmpMostra(null); });
+    els.cmpBody.addEventListener('focusin', e=>{ if(e.target.id==='cmpChart' && cmpGeo) cmpMostra(cmpGeo.idx==null ? cmpGeo.n-1 : cmpGeo.idx); });
+    els.cmpBody.addEventListener('focusout', e=>{ if(e.target.id==='cmpChart') cmpMostra(null); });
+    els.cmpBody.addEventListener('toggle', e=>{ if(e.target.classList && e.target.classList.contains('cmp-days')) state.cmp.dias = e.target.open; }, true);
+    let rz = 0;
+    window.addEventListener('resize', ()=>{ clearTimeout(rz); rz = setTimeout(()=>{ if(state.page==='comparar' && cmpUlt) cmpGrafico(cmpUlt.m, cmpUlt.sA, cmpUlt.sB, cmpUlt.anoC); }, 150); });
+  }
+
   // ---------- events ----------
   function bindEvents(){
     bindExtras();
+    bindComparar();
     els.btnNovo.addEventListener('click', ()=>openModal('novo'));
     els.btnCloseModal.addEventListener('click', closeModal);
     els.btnCancelModal.addEventListener('click', closeModal);
