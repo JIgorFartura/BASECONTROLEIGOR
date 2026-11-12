@@ -386,6 +386,41 @@
     table.cmp-t .cmp-mb{display:flex; align-items:center; justify-content:flex-end; gap:5px; margin-top:3px; font-size:11px; font-weight:500; color:var(--text-muted);}
     table.cmp-t .cmp-mb .cmp-key{width:10px; margin:0;}
   }
+
+  /* ===== v5: exportar, propostas paradas, projeção, cartões no celular ===== */
+  .lh-right{display:flex; align-items:center; gap:12px; flex-wrap:wrap;}
+  .btn-export{background:transparent; border:1px solid var(--border); color:var(--text-muted); padding:6px 13px; border-radius:100px; font-size:12px; font-weight:600; font-family:var(--font-body); cursor:pointer;}
+  .btn-export:hover{border-color:var(--accent); color:var(--accent);}
+  .btn-export:disabled{opacity:.6; cursor:wait;}
+  .parada-badge{margin-top:5px; font-size:11px; font-weight:700; color:var(--gold);}
+  .paradas-alert{display:flex; align-items:center; gap:14px; width:100%; text-align:left; background:color-mix(in srgb, var(--gold) 9%, var(--surface)); border:1px solid color-mix(in srgb, var(--gold) 40%, var(--border)); border-radius:var(--radius-md); padding:12px 16px; margin:-8px 0 22px; color:var(--text); font-family:var(--font-body); cursor:pointer; transition:border-color .15s ease;}
+  .paradas-alert:hover{border-color:var(--gold);}
+  .pa-num{font-family:var(--font-display); font-size:24px; font-weight:700; color:var(--gold); min-width:34px; text-align:center;}
+  .pa-txt{flex:1; font-size:13px; color:var(--text-muted); line-height:1.45;}
+  .pa-txt b{color:var(--text);}
+  .pa-cta{font-size:12.5px; font-weight:700; color:var(--gold); white-space:nowrap;}
+  .proj{font-size:11.5px; color:var(--text-muted); margin-top:9px; padding-top:9px; border-top:1px solid var(--border); line-height:1.45;}
+  .proj b{color:var(--text);}
+  .proj.ok b{color:var(--gold);}
+  .cf-txt{color:var(--text-muted); font-size:13.5px; line-height:1.55; margin:0;}
+  .cf-txt b{color:var(--text);}
+  @media(max-width:640px){
+    .pa-cta{display:none;}
+    #page-painel .table-wrap{background:transparent; border:none; border-radius:0; overflow:visible; max-height:none;}
+    #page-painel .table-wrap table{min-width:0; display:block;}
+    #page-painel .table-wrap thead{display:none;}
+    #page-painel .table-wrap tbody{display:flex; flex-direction:column; gap:10px;}
+    #page-painel .table-wrap tbody tr{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:10px 14px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:14px 16px;}
+    #page-painel .table-wrap tbody tr:hover{background:var(--surface);}
+    #page-painel .table-wrap tbody td{padding:0; border:none; min-width:0; font-size:13px; overflow-wrap:anywhere;}
+    #page-painel .table-wrap tbody td[data-label]::before{content:attr(data-label); display:block; font-size:10.5px; letter-spacing:.04em; text-transform:uppercase; color:var(--text-faint); margin-bottom:3px;}
+    #page-painel .table-wrap tbody td.c-emp{grid-column:1 / -1; order:-3; font-size:15px; font-weight:700;}
+    #page-painel .table-wrap tbody td.c-eq{grid-column:1 / -1; order:-4;}
+    #page-painel .table-wrap tbody td.c-st{grid-column:1 / -1; order:-2;}
+    #page-painel .table-wrap tbody td.c-emp::before, #page-painel .table-wrap tbody td.c-eq::before, #page-painel .table-wrap tbody td.c-acoes::before{display:none;}
+    #page-painel .table-wrap tbody td.c-acoes{display:flex; align-items:flex-end; justify-content:flex-end;}
+    #page-painel .table-wrap tbody td[colspan]{grid-column:1 / -1;}
+  }
 </style>
 </head>
 <body>
@@ -416,6 +451,7 @@
 
       <section id="view-resumo">
         <div class="stats" id="stats"></div>
+        <div id="paradasBox"></div>
 
         <div class="panel">
           <h2>Funil por status</h2>
@@ -429,7 +465,7 @@
       </section>
       <section id="view-rank" hidden></section>
 
-      <div class="list-head"><h2 id="listTitle">Propostas</h2><span id="listSum"></span></div>
+      <div class="list-head"><h2 id="listTitle">Propostas</h2><div class="lh-right"><span id="listSum"></span><button type="button" class="btn-export" id="btnExport" title="Baixa a lista que está na tela">Exportar Excel</button></div></div>
       <div class="toolbar">
         <div class="search-box">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
@@ -440,6 +476,7 @@
         <select class="filter" id="filterOperadora"></select>
         <select class="filter" id="filterCorretor"></select>
         <select class="filter" id="filterStatus"></select>
+        <select class="filter" id="filterParada" title="Propostas que não mudam de status há alguns dias"></select>
         <label class="chk"><input type="checkbox" id="chkTodos"> Todos os meses</label>
         <button class="btn-secondary" id="btnLimparFiltros">Limpar filtros</button>
       </div>
@@ -601,8 +638,7 @@
     { name:'Flávio Teixeira', color:'#9B8CFF', url:'https://script.google.com/macros/s/AKfycbyDNJwnnrMlr6VQhMeuIhs4BAjPkLFPv93R5O5QC-ySl4UkK3zleiVmS0oSifnj69gz/exec' },
   ];
 
-  // Senha de acesso a este painel — troque pela que quiser, é só editar o texto entre aspas.
-  const ACCESS_CODE = 'fartura2026';
+  // A senha fica guardada na própria planilha (Apps Script → Propriedades do script), não aqui.
   const ACCESS_KEY = 'acesso-master';
 
   let state = {
@@ -647,9 +683,8 @@
   async function fetchSource_(source){
     if(!source.url) return { _sem:source.name };
     try{
-      const res = await fetch(source.url + '?action=list&t=' + Date.now(), { method:'GET', cache:'no-store' });
-      if(!res.ok) throw new Error('http '+res.status);
-      const data = await res.json();
+      const data = await listarDe(source.url);
+      if(data.nivel !== 2) throw erroCod('senha'); // o master só abre com a senha do master
       const reg = new Map((data.corretores||[]).map(normC).filter(Boolean).map(n=>[chave(n), n]));
       const vendas = (data.vendas||[]).map(v=>Object.assign({}, v, {
         dataEmissao: toISODate(v.dataEmissao),
@@ -658,12 +693,13 @@
         corretor: reg.get(chave(v.corretor)) || String(v.corretor||'').trim(),
         dataVigencia: toISODate(v.dataVigencia),
         dataImplantacao: toISODate(v.dataImplantacao),
+        statusDesde: toISODate(v.statusDesde),
         vidas: Number(v.vidas)||0,
         _origem:source.name, _origemCor:source.color
       }));
       return { name:source.name, vendas, metas:data.metas||{}, hasAux:Array.isArray(data.corretores) };
     }catch(e){
-      return { _erro:source.name };
+      return { _erro:source.name, code:e.code };
     }
   }
 
@@ -673,13 +709,23 @@
     const falhas = [];
     let vendas = [];
     state.metas = {}; state.aux = {};
+    const entrando = els.lockOverlay.classList.contains('open');
+    if(!results.some(r=>!r._erro && !r._sem)){
+      state.vendas = []; render();
+      const e1 = results.find(r=>r._erro) || {code:'rede'};
+      if(results.some(r=>r._erro && (r.code==='senha' || r.code==='sem-senha'))) pedirSenha(entrando ? 'Senha incorreta.' : 'A senha do master mudou. Digite a senha nova.');
+      else if(entrando) els.lockError.textContent = msgErro(e1);
+      else showToast(msgErro(e1), 'error', 7000);
+      return false;
+    }
     results.forEach(r=>{
-      if(r._erro) falhas.push(r._erro);
+      if(r._erro) falhas.push(r._erro + (r.code==='senha' || r.code==='sem-senha' ? ' (a senha do master não confere nessa planilha)' : (r.code==='script-antigo' ? ' (Script ainda não atualizado)' : '')));
       else if(!r._sem){ vendas = vendas.concat(r.vendas); state.metas[r.name] = r.metas; state.aux[r.name] = r.hasAux; }
     });
     state.vendas = vendas;
-    if(falhas.length) showToast('Não consegui carregar: '+falhas.join(', ')+'.', 'error');
+    if(falhas.length) showToast('Não consegui carregar: '+falhas.join(', ')+'.', 'error', 9000);
     render();
+    return true;
   }
 
 
@@ -791,6 +837,7 @@
       <div class="stat-card"><div class="label">Corretores ativos</div><div class="value">${corretoresAtivos}</div></div>
       ${metaCardHTML(valorImplantado)}
     `;
+    renderParadas();
   }
 
   function renderFunnel(){
@@ -848,6 +895,7 @@
     fillSelect(els.filterOperadora, [{key:'',label:'Operadora'}, ...operadoras.map(o=>({key:o,label:o}))], state.filters.operadora);
     fillSelect(els.filterCorretor, [{key:'',label:'Corretor'}, ...corretores.map(c=>({key:c,label:c}))], state.filters.corretor);
     fillSelect(els.filterStatus, [{key:'',label:'Status'}, ...STATUS_LIST.map(s=>({key:s.key,label:s.key}))], state.filters.status);
+    if(els.filterParada) fillSelect(els.filterParada, PARADA_OPCOES, String(state.filters.parada||''));
   }
 
   function getFiltered(){
@@ -863,6 +911,7 @@
     if(f.operadora) list = list.filter(v=>v.operadora===f.operadora);
     if(f.corretor) list = list.filter(v=>v.corretor===f.corretor);
     if(f.status) list = list.filter(v=>v.status===f.status);
+    if(f.parada) list = list.filter(v=>diasParada(v) >= f.parada);
     const {col,dir} = state.sort;
     list.sort((a,b)=>{
       let av=a[col], bv=b[col];
@@ -880,16 +929,16 @@
     const statusColor = getStatusColor(v.status);
     const porteColor = getPorteColor(v.porte);
     return `<tr>
-      <td><span class="badge" style="background:${hexA(v._origemCor,0.15)}; color:${v._origemCor}">${escapeHtml(v._origem)}</span></td>
-      <td>${escapeHtml(v.numeroProposta)}</td>
-      <td>${escapeHtml(v.empresa)}${(v.porte==='Adesão' && v.dataVigencia) ? `<div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Vigência: ${fmtDateBR(v.dataVigencia)}</div>` : ''}</td>
-      <td>${v.porte ? `<span class="badge" style="background:${hexA(porteColor,0.15)}; color:${porteColor}">${escapeHtml(v.porte)}</span>` : `<span style="color:var(--text-faint); font-size:12px;">Não informado</span>`}</td>
-      <td>${escapeHtml(v.operadora)}</td>
-      <td>${escapeHtml(v.corretor)}</td>
-      <td>${fmtCurrency(v.valor)}</td>
-      <td>${v.vidas ? v.vidas : '—'}</td>
-      <td>${fmtDateBR(v.dataEmissao)}</td>
-      <td><span class="badge" style="background:${hexA(statusColor,0.15)}; color:${statusColor}"><span style="width:6px;height:6px;border-radius:50%;background:${statusColor};display:inline-block;"></span>${escapeHtml(v.status)}</span>${v.status==='Implantado' ? `<div class="impl-date">Implantada em ${fmtDateBR(dataImpl(v))}</div>` : ''}</td>
+      <td data-label="Equipe" class="c-eq"><span class="badge" style="background:${hexA(v._origemCor,0.15)}; color:${v._origemCor}">${escapeHtml(v._origem)}</span></td>
+      <td data-label="Proposta" class="c-num">${escapeHtml(v.numeroProposta)}</td>
+      <td data-label="Empresa/Cliente" class="c-emp">${escapeHtml(v.empresa)}${(v.porte==='Adesão' && v.dataVigencia) ? `<div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Vigência: ${fmtDateBR(v.dataVigencia)}</div>` : ''}</td>
+      <td data-label="Porte" class="c-porte">${v.porte ? `<span class="badge" style="background:${hexA(porteColor,0.15)}; color:${porteColor}">${escapeHtml(v.porte)}</span>` : `<span style="color:var(--text-faint); font-size:12px;">Não informado</span>`}</td>
+      <td data-label="Operadora" class="c-op">${escapeHtml(v.operadora)}</td>
+      <td data-label="Corretor" class="c-cor">${escapeHtml(v.corretor)}</td>
+      <td data-label="Valor" class="c-val">${fmtCurrency(v.valor)}</td>
+      <td data-label="Vidas" class="c-vid">${v.vidas ? v.vidas : '—'}</td>
+      <td data-label="Emissão" class="c-emi">${fmtDateBR(v.dataEmissao)}</td>
+      <td data-label="Status" class="c-st"><span class="badge" style="background:${hexA(statusColor,0.15)}; color:${statusColor}"><span style="width:6px;height:6px;border-radius:50%;background:${statusColor};display:inline-block;"></span>${escapeHtml(v.status)}</span>${v.status==='Implantado' ? `<div class="impl-date">Implantada em ${fmtDateBR(dataImpl(v))}</div>` : ''}${paradaBadge(v)}</td>
     </tr>`;
   }
 
@@ -943,26 +992,15 @@
   const sync = {pending:0, failed:[]};
   let syncQueue = Promise.resolve();
   async function postTo(src, payload){
-    await fetch(src.url, { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(payload) });
-  }
-  async function verifySaved(job){
-    for(const d of [900,1500,2500,3500,5000]){
-      await sleep(d);
-      try{
-        const res = await fetch(job.src.url + '?action=list&t=' + Date.now(), {cache:'no-store'});
-        const data = await res.json();
-        if(data.metas && (Number(data.metas[job.payload.mes])||0)===(Number(job.payload.valor)||0)) return true;
-      }catch(e){}
-    }
-    return false;
+    return postJSON(src.url, payload); // a resposta da planilha confirma a gravação
   }
   async function runJob(job){
     let ok = false;
-    try{ await postTo(job.src, Object.assign({action:'setMeta'}, job.payload)); ok = await verifySaved(job); }catch(e){ ok = false; }
+    try{ await postTo(job.src, Object.assign({action:'setMeta'}, job.payload)); ok = true; job.erro = ''; }catch(e){ ok = false; job.erro = (e.code==='senha' || e.code==='so-master' || e.code==='sem-senha') ? ' (a senha do master não confere na planilha de '+job.src.name+')' : ''; }
     sync.pending--;
     sync.failed = sync.failed.filter(j=>j.key!==job.key);
     if(ok){ if(job.okMsg) showToast('✓ Salvo na planilha: '+job.okMsg+'.', null, 3200); }
-    else { sync.failed.push(job); showToast('NÃO FOI SALVO na planilha: '+job.okMsg+'. Clique no aviso vermelho no topo para tentar de novo.', 'error', 9000); }
+    else { sync.failed.push(job); showToast('NÃO FOI SALVO na planilha: '+job.okMsg+(job.erro||'')+'. Clique no aviso vermelho no topo para tentar de novo.', 'error', 9000); }
     updateSync();
     return ok;
   }
@@ -1016,7 +1054,7 @@
     return l;
   }
   function getBaseList(){
-    if(state.allMonths || (state.filters.search||'').trim()) return state.vendas.slice();
+    if(state.allMonths || (state.filters.search||'').trim() || state.filters.parada) return state.vendas.slice();
     if(state.tab==='rank'){
       let l = baseList();
       if(state.selC) l = l.filter(v=>v.corretor===state.selC);
@@ -1033,6 +1071,7 @@
     else if((state.filters.search||'').trim()) t = 'Resultado da busca em todos os meses';
     else if(state.tab==='rank') t = (state.base==='impl' ? 'Propostas implantadas em ' : 'Propostas emitidas em ') + mes;
     else t = (state.filters.status==='Implantado' ? 'Propostas implantadas em ' : 'Propostas emitidas em ') + mes;
+    if(state.filters.parada && !(state.filters.search||'').trim()) t = 'Propostas paradas há '+state.filters.parada+' dias ou mais, em todos os meses';
     els.listTitle.textContent = t;
     els.listSum.textContent = list.length+(list.length===1?' proposta':' propostas')+' · '+fmtCurrency(sum(list.map(v=>v.valor)));
   }
@@ -1044,9 +1083,9 @@
   }
   function metaCardHTML(valorImpl){
     const meta = metaTotal(state.year, state.month);
-    if(!meta) return `<div class="stat-card meta"><div class="label">Meta do mês</div><div class="value dim">Não definida</div><div class="meta-sub">Defina na aba Metas.</div></div>`;
+    if(!meta) return `<div class="stat-card meta"><div class="label">Meta do mês</div><div class="value dim">Não definida</div><div class="meta-sub">Defina na aba Metas.</div>${projecaoLinha(valorImpl, meta)}</div>`;
     const b = metaBarHTML(valorImpl, meta);
-    return `<div class="stat-card meta ${b.hit?'hit':''}"><div class="label">Meta total · valor implantado</div><div class="value">${b.pct}%</div>${b.html}<div class="meta-sub">${fmtCurrency(valorImpl)} de ${fmtCurrency(meta)}${b.hit?' · meta batida 🎯':' · faltam '+fmtCurrency(meta-valorImpl)}</div></div>`;
+    return `<div class="stat-card meta ${b.hit?'hit':''}"><div class="label">Meta total · valor implantado</div><div class="value">${b.pct}%</div>${b.html}<div class="meta-sub">${fmtCurrency(valorImpl)} de ${fmtCurrency(meta)}${b.hit?' · meta batida 🎯':' · faltam '+fmtCurrency(meta-valorImpl)}</div>${projecaoLinha(valorImpl, meta)}</div>`;
   }
 
   // --- rankings ---
@@ -1626,10 +1665,229 @@
     window.addEventListener('resize', ()=>{ clearTimeout(rz); rz = setTimeout(()=>{ if(state.page==='comparar' && cmpUlt) cmpGrafico(cmpUlt.m, cmpUlt.sA, cmpUlt.sB, cmpUlt.anoC); }, 150); });
   }
 
+  // ---------- v5: senha conferida pela planilha · propostas paradas · projeção · duplicadas · Excel ----------
+  const EH_MASTER = typeof SOURCES !== 'undefined';
+  const SENHA_KEY = ACCESS_KEY + ':senha';
+  const SCRIPT_MIN = 5;
+  let SENHA = '';
+  try{ SENHA = localStorage.getItem(SENHA_KEY) || ''; }catch(e){ /* sem armazenamento: pede a senha a cada visita */ }
+  Object.assign(els, { filterParada:$('filterParada'), btnExport:$('btnExport'), paradasBox:$('paradasBox') });
+
+  function erroCod(code, msg){ const e = new Error(msg || code); e.code = code; return e; }
+  // Todo pedido vai por POST com a senha; a planilha só responde se a senha estiver certa.
+  async function postJSON(url, payload, ms){
+    const ctrl = typeof AbortController!=='undefined' ? new AbortController() : null;
+    const timer = ctrl ? setTimeout(()=>ctrl.abort(), ms || 30000) : 0;
+    try{
+      const res = await fetch(url, { method:'POST', cache:'no-store', body: JSON.stringify(Object.assign({}, payload, {senha:SENHA})), signal: ctrl ? ctrl.signal : undefined });
+      if(!res.ok) throw erroCod('rede', 'http '+res.status);
+      let data;
+      try{ data = await res.json(); }catch(e){ throw erroCod('resposta'); }
+      if(data && data.ok===false){
+        if(data.error==='senha' || data.error==='sem-senha' || data.error==='so-master') throw erroCod(data.error);
+        throw erroCod('planilha', data.error);
+      }
+      return data || {};
+    }catch(e){
+      if(e && e.code) throw e;
+      throw erroCod('rede', String((e && e.message) || e));
+    }finally{ if(timer) clearTimeout(timer); }
+  }
+  async function listarDe(url){
+    const data = await postJSON(url, {action:'listar'});
+    if(!Array.isArray(data.vendas) || (Number(data.versao)||0) < SCRIPT_MIN) throw erroCod('script-antigo');
+    return data;
+  }
+  function msgErro(e){
+    const c = e && e.code;
+    if(c==='senha') return 'Senha incorreta.';
+    if(c==='sem-senha') return 'A senha ainda não foi cadastrada nesta planilha.';
+    if(c==='script-antigo') return 'A planilha está sendo atualizada. Tente de novo em alguns minutos.';
+    if(c==='so-master') return 'Só o painel master pode alterar metas.';
+    return 'Não consegui falar com a planilha. Confira a internet e tente de novo.';
+  }
+  function pedirSenha(msg){
+    SENHA = '';
+    try{ localStorage.removeItem(SENHA_KEY); localStorage.removeItem(ACCESS_KEY); }catch(e){}
+    els.lockError.textContent = msg || '';
+    els.lockOverlay.classList.add('open');
+    setTimeout(()=>els.lockInput.focus(), 60);
+  }
+
+  // --- propostas paradas: sem mudar de status há X dias ---
+  const PARADA_DIAS = 7;
+  const PARADA_OPCOES = [{key:'',label:'Paradas'}, {key:'3',label:'Paradas há 3+ dias'}, {key:'7',label:'Paradas há 7+ dias'}, {key:'15',label:'Paradas há 15+ dias'}, {key:'30',label:'Paradas há 30+ dias'}];
+  function desdeStatus(v){
+    const s = toISODate(v.statusDesde); if(s) return s;
+    const u = Number(v.updatedAt);
+    if(u > 0){ const d = new Date(u); if(!isNaN(d)) return toISODate(d); }
+    return toISODate(v.dataEmissao);
+  }
+  function diasParada(v){
+    if(v.status==='Implantado' || v.status==='Cancelado') return -1;
+    const d = desdeStatus(v);
+    return d ? Math.max(0, diasEntre(d, todayISO())) : -1;
+  }
+  function paradaBadge(v){
+    const d = diasParada(v);
+    return d >= PARADA_DIAS ? `<div class="parada-badge" title="Neste status desde ${fmtDateBR(desdeStatus(v))}">parada há ${d} dias</div>` : '';
+  }
+  function renderParadas(){
+    const box = els.paradasBox; if(!box) return;
+    const lista = state.vendas.filter(v=>diasParada(v) >= PARADA_DIAS);
+    if(!lista.length){ box.innerHTML = ''; return; }
+    let extra = '';
+    if(EH_MASTER){
+      const por = SOURCES.map(s=>({n:s.name.split(' ')[0], q:lista.filter(v=>v._origem===s.name).length})).filter(x=>x.q);
+      extra = ' · ' + por.map(x=>x.n+' '+x.q).join(', ');
+    }
+    box.innerHTML = `<button type="button" class="paradas-alert" data-paradas="${PARADA_DIAS}">
+      <span class="pa-num">${lista.length}</span>
+      <span class="pa-txt"><b>${lista.length===1 ? 'proposta parada' : 'propostas paradas'} há ${PARADA_DIAS} dias ou mais</b> sem mudar de status · ${fmtCurrency(sum(lista.map(v=>Number(v.valor)||0)))}${escapeHtml(extra)}</span>
+      <span class="pa-cta">Ver lista →</span>
+    </button>`;
+  }
+
+  // --- projeção do mês (só no mês atual): implantado até hoje ÷ dias corridos × dias do mês ---
+  function projecaoLinha(valorImpl, meta){
+    const hoje = new Date();
+    if(state.year!==hoje.getFullYear() || state.month!==hoje.getMonth()) return '';
+    const dia = hoje.getDate(), total = new Date(state.year, state.month+1, 0).getDate();
+    if(!valorImpl) return `<div class="proj">Projeção: ainda sem implantações neste mês</div>`;
+    const proj = valorImpl / dia * total;
+    const pct = meta ? Math.round(proj/meta*100) : 0;
+    return `<div class="proj${meta && pct>=100 ? ' ok' : ''}" title="Valor implantado até hoje ÷ ${dia} dias × ${total} dias do mês">Projeção no ritmo atual: <b>${fmtCurrency(proj)}</b>${meta ? ' · '+pct+'% da meta' : ''}</div>`;
+  }
+
+  // --- proposta repetida ---
+  const normNum = s => String(s==null ? '' : s).replace(/[\s.\-\/]/g,'').toLowerCase();
+  function acharDuplicada(num, ignorarId){
+    const k = normNum(num); if(!k) return null;
+    return state.vendas.find(v=>String(v.id)!==String(ignorarId||'') && normNum(v.numeroProposta)===k) || null;
+  }
+  function confirmar(o){
+    return new Promise(resolve=>{
+      const ov = document.createElement('div');
+      ov.className = 'overlay open'; ov.style.zIndex = '160';
+      ov.innerHTML = `<div class="modal" role="alertdialog" aria-modal="true" aria-labelledby="cfTitulo" style="max-width:440px;">
+        <div class="modal-head"><h3 id="cfTitulo">${escapeHtml(o.titulo)}</h3></div>
+        <p class="cf-txt">${o.html}</p>
+        <div class="modal-actions"><button type="button" class="btn-secondary" data-r="0">${escapeHtml(o.nao || 'Cancelar')}</button><button type="button" class="btn-primary" data-r="1">${escapeHtml(o.sim || 'Confirmar')}</button></div>
+      </div>`;
+      const fim = r => { ov.remove(); document.removeEventListener('keydown', esc, true); resolve(r); };
+      const esc = e => { if(e.key==='Escape'){ e.stopPropagation(); e.preventDefault(); fim(false); } };
+      ov.addEventListener('click', e=>{ const b = e.target.closest('[data-r]'); if(b) fim(b.dataset.r==='1'); else if(e.target===ov) fim(false); });
+      document.addEventListener('keydown', esc, true);
+      document.body.appendChild(ov);
+      setTimeout(()=>{ const b = ov.querySelector('[data-r="0"]'); if(b) b.focus(); }, 30);
+    });
+  }
+  async function confirmarDuplicada(num, ignorarId){
+    const d = acharDuplicada(num, ignorarId);
+    if(!d) return true;
+    return confirmar({
+      titulo:'Proposta repetida',
+      html:`Já existe a proposta <b>nº ${escapeHtml(d.numeroProposta)}</b>: ${escapeHtml(d.empresa||'—')} · ${escapeHtml(d.corretor||'—')} · ${escapeHtml(d.status||'—')}, emitida em ${fmtDateBR(d.dataEmissao)}.<br><br>Quer salvar assim mesmo?`,
+      sim:'Salvar assim mesmo', nao:'Voltar e corrigir'
+    });
+  }
+
+  // --- exportar a lista que está na tela ---
+  const XLSX_URL = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+  let xlsxPromise = null;
+  function carregarXLSX(){
+    if(window.XLSX) return Promise.resolve(window.XLSX);
+    if(!xlsxPromise) xlsxPromise = new Promise((res, rej)=>{
+      const s = document.createElement('script');
+      s.src = XLSX_URL; s.async = true;
+      const t = setTimeout(()=>{ xlsxPromise = null; rej(new Error('tempo')); }, 15000);
+      s.onload = ()=>{ clearTimeout(t); if(window.XLSX) res(window.XLSX); else { xlsxPromise = null; rej(new Error('xlsx')); } };
+      s.onerror = ()=>{ clearTimeout(t); xlsxPromise = null; rej(new Error('rede')); };
+      document.head.appendChild(s);
+    });
+    return xlsxPromise;
+  }
+  function linhasExport(list){
+    return list.map(v=>{
+      const o = {};
+      if(EH_MASTER) o['Equipe'] = v._origem || '';
+      o['Nº da proposta'] = String(v.numeroProposta==null ? '' : v.numeroProposta);
+      o['Empresa/Cliente'] = v.empresa || '';
+      o['Porte'] = v.porte || '';
+      o['Operadora'] = v.operadora || '';
+      o['Corretor'] = v.corretor || '';
+      o['Valor'] = Number(v.valor) || 0;
+      o['Vidas'] = Number(v.vidas) || 0;
+      o['Emissão'] = toISODate(v.dataEmissao) ? fmtDateBR(v.dataEmissao) : '';
+      o['Status'] = v.status || '';
+      o['Implantação'] = v.status==='Implantado' ? fmtDateBR(dataImpl(v)) : '';
+      o['Vigência'] = toISODate(v.dataVigencia) ? fmtDateBR(v.dataVigencia) : '';
+      const d = diasParada(v); o['Dias no status'] = d >= 0 ? d : '';
+      return o;
+    });
+  }
+  function nomeArquivo(ext){
+    const base = EH_MASTER ? 'master' : ACCESS_KEY.replace(/^acesso-/, '');
+    const titulo = semAcento(els.listTitle.textContent || 'propostas').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60);
+    return 'vendas-' + base + '-' + titulo + '-' + todayISO() + '.' + ext;
+  }
+  function baixarCSV(linhas, nome){
+    const cols = Object.keys(linhas[0]);
+    const cel = v => {
+      if(typeof v==='number') return String(v).replace('.', ',');
+      let s = String(v==null ? '' : v);
+      if(/^[=+\-@\t\r]/.test(s)) s = "'" + s; // evita que o Excel trate texto como fórmula
+      return '"' + s.replace(/"/g, '""') + '"';
+    };
+    const csv = String.fromCharCode(0xFEFF) + [cols.map(cel).join(';')].concat(linhas.map(l=>cols.map(c=>cel(l[c])).join(';'))).join('\r\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv;charset=utf-8'}));
+    a.download = nome;
+    document.body.appendChild(a); a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  }
+  async function exportarExcel(){
+    const list = getFiltered();
+    if(!list.length){ showToast('Nada para exportar com os filtros de agora.', 'error'); return; }
+    const linhas = linhasExport(list);
+    const btn = els.btnExport, txt = btn.textContent;
+    btn.disabled = true; btn.textContent = 'Gerando…';
+    try{
+      const X = await carregarXLSX();
+      const ws = X.utils.json_to_sheet(linhas);
+      const cols = Object.keys(linhas[0]);
+      ws['!cols'] = cols.map(c=>({wch: Math.min(42, Math.max(c.length, ...linhas.map(l=>String(l[c]).length)) + 2)}));
+      const ci = cols.indexOf('Valor');
+      for(let r=1; r<=linhas.length; r++){ const cell = ws[X.utils.encode_cell({r, c:ci})]; if(cell) cell.z = '"R$" #,##0.00'; }
+      const wb = X.utils.book_new();
+      X.utils.book_append_sheet(wb, ws, 'Propostas');
+      X.writeFile(wb, nomeArquivo('xlsx'));
+      showToast('Planilha gerada com ' + list.length + (list.length===1 ? ' proposta.' : ' propostas.'));
+    }catch(e){
+      baixarCSV(linhas, nomeArquivo('csv'));
+      showToast('Exportei em CSV, que também abre no Excel.');
+    }finally{
+      btn.disabled = false; btn.textContent = txt;
+    }
+  }
+
+  function bindPacote(){
+    if(els.btnExport) els.btnExport.addEventListener('click', exportarExcel);
+    if(els.filterParada) els.filterParada.addEventListener('change', e=>{ state.filters.parada = Number(e.target.value)||0; renderTable(); });
+    if(els.paradasBox) els.paradasBox.addEventListener('click', e=>{
+      const b = e.target.closest('[data-paradas]'); if(!b) return;
+      state.filters.parada = Number(b.dataset.paradas) || PARADA_DIAS;
+      renderFilters(); renderTable();
+      const h = document.querySelector('#page-painel .list-head');
+      if(h) h.scrollIntoView({behavior:'smooth', block:'start'});
+    });
+  }
+
   // ---------- events ----------
   function bindEvents(){
     bindExtras();
     bindComparar();
+    bindPacote();
     els.theadRow.addEventListener('click', e=>{
       const th = e.target.closest('th[data-col]');
       if(!th) return;
@@ -1671,33 +1929,38 @@
     });
 
     els.btnLock.addEventListener('click', ()=>{
-      try{ localStorage.removeItem(ACCESS_KEY); }catch(err){}
+      try{ localStorage.removeItem(ACCESS_KEY); localStorage.removeItem(SENHA_KEY); }catch(err){}
       location.reload();
     });
   }
 
   function checkAccess(){
-    let unlocked = false;
-    try{ unlocked = localStorage.getItem(ACCESS_KEY) === '1'; }catch(e){ /* segue pedindo senha */ }
-    if(unlocked){
-      els.lockOverlay.classList.remove('open');
-      loadAll();
-      return;
-    }
-    els.lockOverlay.classList.add('open');
-    setTimeout(()=>els.lockInput.focus(), 60);
+    if(SENHA){ els.lockOverlay.classList.remove('open'); loadAll(); return; }
+    pedirSenha('');
   }
-  els.lockForm.addEventListener('submit', e=>{
+  // A senha é conferida pela planilha: só abre se a planilha aceitar.
+  els.lockForm.addEventListener('submit', async e=>{
     e.preventDefault();
-    if(els.lockInput.value.trim() === ACCESS_CODE){
-      try{ localStorage.setItem(ACCESS_KEY, '1'); }catch(err){}
+    const s = els.lockInput.value.trim();
+    const btn = els.lockForm.querySelector('button[type="submit"]');
+    if(!s){ els.lockError.textContent = 'Digite a senha.'; els.lockInput.focus(); return; }
+    if(btn.disabled) return;
+    const txt = btn.textContent;
+    btn.disabled = true; btn.textContent = 'Conferindo…';
+    els.lockError.textContent = '';
+    SENHA = s;
+    let ok = false;
+    try{ ok = await loadAll(); }catch(err){ ok = false; }
+    btn.disabled = false; btn.textContent = txt;
+    if(ok){
+      try{ localStorage.setItem(SENHA_KEY, s); }catch(err){}
       els.lockOverlay.classList.remove('open');
-      els.lockError.textContent = '';
-      loadAll();
-    } else {
-      els.lockError.textContent = 'Senha incorreta.';
       els.lockInput.value = '';
-      els.lockInput.focus();
+      els.lockError.textContent = '';
+    } else {
+      SENHA = '';
+      if(!els.lockError.textContent) els.lockError.textContent = msgErro({code:'rede'});
+      els.lockInput.select();
     }
   });
 
