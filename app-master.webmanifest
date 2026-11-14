@@ -1,0 +1,39 @@
+{
+  "id": "/BASECONTROLEIGOR/registro-vendas-master.html",
+  "name": "Visão Geral — Todas as Equipes",
+  "short_name": "Master",
+  "description": "Consolidado das equipes — consulta de vendas e definição das metas mensais",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "start_url": "./registro-vendas-master.html",
+  "scope": "./registro-vendas-master.html",
+  "display": "standalone",
+  "background_color": "#0D1310",
+  "theme_color": "#0D1310",
+  "icons": [
+    {
+      "src": "icone-master-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icone-master-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icone-master-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icone-master-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

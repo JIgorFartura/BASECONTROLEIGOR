@@ -1,0 +1,39 @@
+{
+  "id": "/BASECONTROLEIGOR/registro-vendas.html",
+  "name": "Relatório de vendas José Igor Fartura",
+  "short_name": "José Igor",
+  "description": "Painel de propostas e vendas — planos de saúde e odonto",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "start_url": "./registro-vendas.html",
+  "scope": "./registro-vendas.html",
+  "display": "standalone",
+  "background_color": "#0D1310",
+  "theme_color": "#0D1310",
+  "icons": [
+    {
+      "src": "icone-jose-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icone-jose-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icone-jose-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icone-jose-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

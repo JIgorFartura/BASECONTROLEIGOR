@@ -3,6 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0D1310">
+<link rel="manifest" href="app-jose.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icone-jose-192.png">
+<link rel="apple-touch-icon" href="icone-jose-180.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="José Igor">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <title>Relatório de vendas José Igor Fartura</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -390,6 +398,15 @@
     #page-painel .table-wrap tbody td.c-acoes{display:flex; align-items:flex-end; justify-content:flex-end;}
     #page-painel .table-wrap tbody td[colspan]{grid-column:1 / -1;}
   }
+
+  /* ===== app instalável ===== */
+  .btn-app{display:inline-flex; align-items:center; gap:7px; background:transparent; border:1px solid color-mix(in srgb, var(--accent) 55%, var(--border)); color:var(--accent); border-radius:100px; padding:8px 14px; font-size:12px; font-weight:700; font-family:var(--font-body); cursor:pointer;}
+  .btn-app:hover{background:color-mix(in srgb, var(--accent) 10%, transparent);}
+  .btn-app[hidden]{display:none;}
+  .app-passos{margin:0; padding-left:20px; color:var(--text-muted); font-size:13.5px; line-height:1.6;}
+  .app-passos li{margin-bottom:6px;}
+  .app-passos b{color:var(--text);}
+  .app-nota{font-size:12.5px; color:var(--text-faint); margin:10px 0 0; line-height:1.5;}
 </style>
 </head>
 <body>
@@ -401,6 +418,10 @@
       </div>
       <div class="head-actions">
         <button type="button" class="sync" id="syncPill" data-s="ok"><i></i><span>Tudo salvo na planilha</span></button>
+        <button type="button" class="btn-app" id="btnApp" hidden>
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M12 7v7M9 11l3 3 3-3"/></svg>
+          Instalar app
+        </button>
         <button class="btn-primary" id="btnNovo">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
           Nova venda
@@ -1380,6 +1401,13 @@
       if(sync.failed.length) retryFailed();
       else if(sync.pending===0) loadAll();
     });
+    let foraDesde = 0;
+    document.addEventListener('visibilitychange', ()=>{
+      if(document.hidden){ foraDesde = Date.now(); return; }
+      const longe = foraDesde && (Date.now() - foraDesde > 120000);
+      foraDesde = 0;
+      if(longe && sync.pending===0 && !sync.failed.length && !document.querySelector('.overlay.open')) loadAll();
+    });
     window.addEventListener('beforeunload', e=>{ if(sync.pending>0 || sync.failed.length){ e.preventDefault(); e.returnValue=''; } });
 
     document.getElementById('pageNav').addEventListener('click', e=>{ const b=e.target.closest('button'); if(b) setPage(b.dataset.page); });
@@ -2270,6 +2298,68 @@
 
   bindEvents();
   checkAccess();
+})();
+</script>
+
+<script>
+// ===== App instalável: registra o service worker e mostra o botão "Instalar app" =====
+(function(){
+  var ua = navigator.userAgent || '';
+  var ios = /iphone|ipad|ipod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  var android = /android/i.test(ua);
+  var instalado = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
+  var podeSW = 'serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1');
+  if(podeSW){
+    window.addEventListener('load', function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); });
+  }
+
+  var btn = document.getElementById('btnApp');
+  if(!btn || instalado) return;
+  var convite = null;
+  function mostrar(){ btn.hidden = false; }
+  window.addEventListener('beforeinstallprompt', function(e){ e.preventDefault(); convite = e; mostrar(); });
+  window.addEventListener('appinstalled', function(){ convite = null; btn.hidden = true; });
+  if(ios || android) mostrar();
+
+  btn.addEventListener('click', function(){
+    if(convite){
+      var ev = convite; convite = null;
+      ev.prompt();
+      if(ev.userChoice) ev.userChoice.then(function(r){ if(r && r.outcome === 'accepted') btn.hidden = true; }).catch(function(){});
+      return;
+    }
+    ajuda();
+  });
+
+  var ICONE_COMPARTILHAR = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M12 3v12M8 7l4-4 4 4"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>';
+  function ajuda(){
+    var passos, nota;
+    if(ios){
+      passos = '<li>Toque no botão <b>Compartilhar</b> ' + ICONE_COMPARTILHAR + ' (na barra do Safari).</li>' +
+               '<li>Role a lista e toque em <b>Adicionar à Tela de Início</b>.</li>' +
+               '<li>Toque em <b>Adicionar</b>. O ícone do painel aparece na tela do celular.</li>';
+      nota = 'Se o link abriu dentro do WhatsApp, primeiro abra no Safari. Ao entrar pelo ícone, a senha é pedida uma vez.';
+    } else {
+      passos = '<li>Toque no menu <b>⋮</b> do Chrome (canto de cima).</li>' +
+               '<li>Toque em <b>Instalar app</b> (ou <b>Adicionar à tela inicial</b>).</li>' +
+               '<li>Confirme. O ícone do painel aparece na tela do celular.</li>';
+      nota = 'Se o link abriu dentro do WhatsApp, primeiro toque em ⋮ e escolha abrir no Chrome.';
+    }
+    var ov = document.createElement('div');
+    ov.className = 'overlay open'; ov.style.zIndex = '170';
+    ov.innerHTML = '<div class="modal" role="dialog" aria-modal="true" aria-labelledby="appTitulo" style="max-width:420px;">' +
+      '<div class="modal-head"><h3 id="appTitulo">Instalar o painel no celular</h3></div>' +
+      '<ol class="app-passos">' + passos + '</ol>' +
+      '<p class="app-nota">' + nota + '</p>' +
+      '<div class="modal-actions"><button type="button" class="btn-primary" data-fechar>Entendi</button></div>' +
+      '</div>';
+    function fechar(){ ov.remove(); document.removeEventListener('keydown', esc, true); }
+    function esc(e){ if(e.key === 'Escape'){ e.stopPropagation(); e.preventDefault(); fechar(); } }
+    ov.addEventListener('click', function(e){ if(e.target === ov || e.target.closest('[data-fechar]')) fechar(); });
+    document.addEventListener('keydown', esc, true);
+    document.body.appendChild(ov);
+    setTimeout(function(){ var b = ov.querySelector('[data-fechar]'); if(b) b.focus(); }, 30);
+  }
 })();
 </script>
 </body>

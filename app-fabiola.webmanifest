@@ -1,0 +1,39 @@
+{
+  "id": "/BASECONTROLEIGOR/registro-vendas-fabiola-messeder.html",
+  "name": "Relatório de vendas Fabiola Messeder",
+  "short_name": "Fabíola",
+  "description": "Painel de propostas e vendas — planos de saúde e odonto",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "start_url": "./registro-vendas-fabiola-messeder.html",
+  "scope": "./registro-vendas-fabiola-messeder.html",
+  "display": "standalone",
+  "background_color": "#0B121A",
+  "theme_color": "#0B121A",
+  "icons": [
+    {
+      "src": "icone-fabiola-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icone-fabiola-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icone-fabiola-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icone-fabiola-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
